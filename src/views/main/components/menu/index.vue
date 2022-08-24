@@ -15,12 +15,10 @@
 </template>
 
 <script setup>
-defineProps({
-  categorys: {
-    type: Array,
-    required: true
-  }
-})
+import { useStore } from 'vuex'
+import { computed } from 'vue'
+const store = useStore()
+const categorys = computed(() => store.getters.categorys)
 const emits = defineEmits(['handleSelectCategory'])
 </script>
 

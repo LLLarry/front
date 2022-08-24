@@ -8,7 +8,7 @@
       :style="sliderStyle"
     ></li>
     <li
-      v-for="(category, index) in data"
+      v-for="(category, index) in categorys"
       :key="category.id"
       class="shrink-0 px-1.5 py-0.5 z-10"
       :class="{ 'text-zinc-50': index === curretIndex }"
@@ -36,17 +36,13 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { useScroll } from '@vueuse/core'
 import Menu from '@/views/main/components/menu/index.vue'
 import { scrollTransition } from '@/utils'
+import { useStore } from 'vuex'
+const store = useStore()
 const run = scrollTransition()
-const props = defineProps({
-  data: {
-    type: Array,
-    required: true
-  }
-})
 
 // 默认选中索引
 const curretIndex = ref(-1)
@@ -66,6 +62,8 @@ const scrollRaces = ref([])
 const { x: ulScrollLeft } = useScroll(ulEle)
 
 const visible = ref(false)
+
+const categorys = computed(() => store.getters.categorys)
 
 // 选中索引
 const handleSelectCategory = (index) => {
@@ -108,10 +106,10 @@ watch(
 
 // 监听data初次数据渲染之后，将slider条设置到第一项
 watch(
-  () => props.data,
-  () => {
+  categorys,
+  (cgs) => {
     nextTick(() => {
-      if (props.data.length <= 0) return
+      if (cgs.length <= 0) return
       curretIndex.value = 0
       // 获取1/2屏幕的宽度
       const halfScreenWidth = window.innerWidth / 2
@@ -127,9 +125,3 @@ watch(
   }
 )
 </script>
-
-<style scoped>
-/* ul {
-  scroll-behavior: smooth;
-} */
-</style>
