@@ -6,7 +6,9 @@ import { isMoboleTerminal } from '@/utils/flexible'
 </script>
 
 <template>
-  <router-view />
+  <div class="w-screen h-screen fixed top-0 left-0">
+    <router-view />
+  </div>
 </template>
 
 <style scoped>

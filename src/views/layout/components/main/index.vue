@@ -1,5 +1,6 @@
 <template>
-  <h1 class="h-main">
+  <div class="h-main">
+    <router-view />
     <Button type="primary" plain>搜索</Button>
     <Button type="warning" plain>搜索</Button>
     <Button type="danger" plain>搜索</Button>
@@ -21,7 +22,7 @@
     <popover trigger="focus"> focus </popover>
     <popover trigger="manual"> manual </popover>
     <div style="height: 2000vh; width: 2000vh"></div>
-  </h1>
+  </div>
 </template>
 
 <script setup>

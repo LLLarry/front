@@ -12,6 +12,7 @@ const count = ref(0)
   <div class="box">
     <div class="image bg-">
       <img
+        v-lazy
         src="https://images.pexels.com/photos/5313576/pexels-photo-5313576.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
         alt=""
       />

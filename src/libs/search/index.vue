@@ -1,11 +1,11 @@
 <template>
   <div
-    class="search-com flex items-center flex-1 relative p-[6px] rounded-full hover:bg-red-50 duration-300"
+    class="search-com flex items-center flex-1 relative p-[6px] rounded-full hover:bg-red-50 duration-500 dark:hover:bg-red-50/30"
     @click.stop.prevent
   >
     <svg-icon
       name="search"
-      class="w-1.5 h-1.5 absolute translate-y-[-50%] top-[50%] left-3"
+      class="w-1.5 h-1.5 absolute translate-y-[-50%] top-[50%] left-3 dark:fill-zinc-400"
     />
     <input
       :value="modelValue"
@@ -15,7 +15,7 @@
       @blur.stop="onBlur"
       @input.stop="onInput"
       @change.stop="onChange"
-      class="flex-1 bg-zinc-100 rounded-full h-[44px] px-5 border border-zinc-300 text-sm font-semibold outline-none duration-300 focus:border-red-300 hover:bg-white placeholder:text-sm"
+      class="flex-1 bg-zinc-100 rounded-full h-[44px] px-5 border-2 border-zinc- text-sm font-semibold outline-none hover:border-red-300 hover:bg-white placeholder:text-sm duration-500 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
     />
     <!-- 清空按钮 -->
     <div
@@ -29,7 +29,7 @@
     <Button
       type="danger"
       icon="search"
-      class="search-btn cursor-pointer w-[40px] h-[40px] rounded-full absolute translate-y-[-50%] top-[50%] right-[12px] opacity-0"
+      class="search-btn cursor-pointer w-[40px] h-[40px] rounded-full absolute translate-y-[-50%] top-[50%] right-[12px] opacity-0 dark:bg-transparent dark:border-transparent dark:hover:bg-zinc-900 dark:text-zinc-500"
       @click.stop="onConfirm"
     />
   </div>

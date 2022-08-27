@@ -1,4 +1,4 @@
-import { ALL_CATEGOARY_ITEM } from '@/constants'
+import { ALL_CATEGOARY_ITEM, DEFAULT_CATEGOARS } from '@/constants'
 import { getCategories } from '@/api/categories'
 
 // 处理 navigation中头部数据部分
@@ -6,7 +6,7 @@ export default {
   namespaced: true,
   state() {
     return {
-      categorys: []
+      categorys: [ALL_CATEGOARY_ITEM, ...DEFAULT_CATEGOARS]
     }
   },
   mutations: {

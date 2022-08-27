@@ -10,6 +10,7 @@
       <template #reference>
         <div class="flex items-center">
           <img
+            v-lazy
             src="https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png"
             class="w-4 h-4 rounded-sm"
             alt=""
@@ -23,14 +24,17 @@
 
       <!-- 菜單 -->
       <div
-        class="text-sm cursor-pointer w-[140px] overflow-hidden text-zinc-600"
+        class="text-sm cursor-pointer w-[140px] overflow-hidden text-zinc-600 dark:bg-zinc-800"
       >
         <div
           v-for="menu in menus"
           :key="menu.id"
-          class="flex items-center p-1 hover:bg-zinc-100/60 duration-300"
+          class="flex items-center p-1 hover:bg-zinc-100/60 duration-300 dark:hover:bg-zinc-700 dark:text-zinc-300"
         >
-          <svg-icon :name="menu.icon" class="w-1.5 h-1.5 mr-1 fill-zinc-600" />
+          <svg-icon
+            :name="menu.icon"
+            class="w-1.5 h-1.5 mr-1 fill-zinc-600 dark:fill-zinc-300"
+          />
           <div>{{ menu.title }}</div>
         </div>
       </div>

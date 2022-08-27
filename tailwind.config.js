@@ -5,9 +5,9 @@ module.exports = {
       fontSize: {
         xs: ['0.25rem', { lineHeight: '0.35rem' }],
         sm: ['0.35rem', { lineHeight: '0.45rem' }],
-        base: ['0.45rem', { lineHeight: '0.55rem' }],
-        lg: ['0.55rem', { lineHeight: '0.65rem' }],
-        xl: ['0.65rem', { lineHeight: '0.75rem' }]
+        base: ['0.425rem', { lineHeight: '0.525rem' }],
+        lg: ['0.525rem', { lineHeight: '0.625rem' }],
+        xl: ['0.625rem', { lineHeight: '0.725rem' }]
       },
       boxShadow: {
         'l-white': '-10px 0 10px white'
@@ -21,5 +21,6 @@ module.exports = {
       }
     }
   },
-  plugins: []
+  plugins: [],
+  darkMode: 'class'
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-header flex items-center px-2">
+  <div class="h-header flex items-center px-2 dark:bg-zinc-800 duration-500">
     <header-logo />
     <search v-model="keywords" @confirm="onConfirm" @input="onInput" />
     <header-theme />

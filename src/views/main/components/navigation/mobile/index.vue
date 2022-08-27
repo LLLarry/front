@@ -30,7 +30,7 @@
       />
     </li>
   </ul>
-  <popup v-model="visible" class="aaa" style="color: red">
+  <popup v-model="visible" style="color: red">
     <Menu :categorys="data" @handleSelectCategory="handleSelectCategory" />
   </popup>
 </template>

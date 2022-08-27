@@ -34,6 +34,7 @@
           class="w-[260px] h-[140px] overflow-hidden rounded-md relative flex-shrink-0"
         >
           <img
+            v-lazy
             class="w-full object-contain"
             src="https://images.pexels.com/videos/8091554/burglar-country-house-couple-couple-hugging-8091554.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=250&w=360"
             alt=""
@@ -52,6 +53,7 @@
             :key="item"
           >
             <img
+              v-lazy
               class="w-full object-contain"
               src="https://images.pexels.com/videos/8091554/burglar-country-house-couple-couple-hugging-8091554.jpeg?auto=compress&cs=tinysrgb&dpr=1&fit=crop&h=250&w=360"
               alt=""

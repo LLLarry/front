@@ -1,5 +1,5 @@
 <template>
-  <div class="h-header">
+  <div class="h-header bg-white dark:bg-zinc-800 duration-500">
     <header-search />
   </div>
 </template>

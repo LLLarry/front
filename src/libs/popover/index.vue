@@ -7,7 +7,7 @@
       <div
         v-if="tipVisible"
         ref="tipRoot"
-        class="fixed shadow-lg p-1 rounded-sm border border-zinc-100 z-20 bg-white"
+        class="fixed shadow-lg p-1 rounded-sm border border-zinc-100 z-20 bg-white dark:bg-zinc-800 dark:border-zinc-900"
         :style="tipStyle"
         @click.stop
       >
