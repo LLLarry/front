@@ -79,6 +79,9 @@ watch(
   () => props.data,
   async (newData) => {
     await nextTick()
+    if (newData.length <= 0) {
+      init()
+    }
     // 执行初始化数据，执行之后useInit的返回值为最新的数据
     if (props.isPicturePreReading) {
       // 等待与所有图片渲染完毕
@@ -111,7 +114,6 @@ watch(
         fmtGaps,
         props
       })
-      // }
     }
   },
   {

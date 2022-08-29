@@ -32,6 +32,14 @@
       class="search-btn cursor-pointer w-[40px] h-[40px] rounded-full absolute translate-y-[-50%] top-[50%] right-[12px] opacity-0 dark:bg-transparent dark:border-transparent dark:hover:bg-zinc-900 dark:text-zinc-500"
       @click.stop="onConfirm"
     />
+    <transition name="search-tip">
+      <div
+        class="absolute z-50 shadow left-0 right-0 bottom-0 rounded-sm bg-white border border-zinc-300 translate-y-full p-1 max-h-[270px] overflow-auto dark:bg-zinc-800 duration-300 dark:border-zinc-600"
+        v-if="visible"
+      >
+        <slot name="dropdown" />
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -47,7 +55,7 @@ const EVENT_TYPES = [
 </script>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const emits = defineEmits(EVENT_TYPES)
 const props = defineProps({
@@ -56,7 +64,7 @@ const props = defineProps({
     required: true
   }
 })
-console.log(props)
+const visible = ref(false)
 // 是否执行清零按钮
 const inputDeleteVisible = computed(
   () => props.modelValue && props.modelValue.length > 0
@@ -65,6 +73,7 @@ const handleUpdateValue = (value) => {
   emits('update:modelValue', value)
 }
 const onFocus = (...argu) => {
+  visible.value = true
   emits('focus', argu)
 }
 const onBlur = (...argu) => {
@@ -83,6 +92,17 @@ const onConfirm = () => {
 const onCancelText = () => {
   handleUpdateValue('')
 }
+
+// 点击search任何地方关闭提示栏
+function handleEvent() {
+  visible.value = false
+}
+onMounted(() => {
+  document.addEventListener('click', handleEvent)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleEvent)
+})
 </script>
 
 <style lang="scss" scoped>

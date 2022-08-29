@@ -11,8 +11,8 @@
       v-for="(category, index) in categorys"
       :key="category.id"
       class="shrink-0 px-1.5 py-0.5 z-10"
-      :class="{ 'text-zinc-50': index === curretIndex }"
-      @click="handleSelectCategory(index)"
+      :class="{ 'text-zinc-50': index === currentCategoryIndex }"
+      @click="handleSelectCategory({category, index})"
       :ref="storeLiEle"
     >
       {{ category.name }}
@@ -41,11 +41,12 @@ import { useScroll } from '@vueuse/core'
 import Menu from '@/views/main/components/menu/index.vue'
 import { scrollTransition } from '@/utils'
 import { useStore } from 'vuex'
+import { ALL_CATEGOARY_ITEM } from '@/constants'
 const store = useStore()
 const run = scrollTransition()
 
-// 默认选中索引
-const curretIndex = ref(-1)
+// 选中菜单的索引
+const currentCategoryIndex = computed(() => store.getters.currentCategoryIndex)
 const sliderStyle = ref({
   left: '10px',
   width: '0px',
@@ -66,10 +67,9 @@ const visible = ref(false)
 const categorys = computed(() => store.getters.categorys)
 
 // 选中索引
-const handleSelectCategory = (index) => {
-  curretIndex.value = index
+const handleSelectCategory = ({category, index}) => {
+  store.commit('app/changeCurrentCategory', category)
   visible.value = false
-  // ulEle.value.scrollTo(scrollRaces.value[index], 0)
   run({
     el: ulEle.value,
     position: scrollRaces.value[index],
@@ -84,7 +84,7 @@ const storeLiEle = (el) => {
 }
 
 watch(
-  curretIndex,
+  currentCategoryIndex,
   (newIndex, oldIndex) => {
     // 保证渲染之后再进行计算元素的位置
     nextTick(() => {
@@ -110,7 +110,7 @@ watch(
   (cgs) => {
     nextTick(() => {
       if (cgs.length <= 0) return
-      curretIndex.value = 0
+      store.commit('app/changeCurrentCategory', ALL_CATEGOARY_ITEM)
       // 获取1/2屏幕的宽度
       const halfScreenWidth = window.innerWidth / 2
       // 每一项向左滚动的距离 = 每一项距离屏幕左边的距离 - 1/2屏幕的宽度 + 1/2自身的宽度

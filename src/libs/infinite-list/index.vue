@@ -3,8 +3,8 @@
     <!-- 展示列表内容插槽 -->
     <slot />
     <!-- 底部 ---加载中插槽 -->
-    <div ref="infiniteLoadEle">
-      <slot name="loading" v-if="!isFinished && modelValue">
+    <div ref="infiniteLoadEle" class="py-0.5">
+      <slot name="loading" v-if="!isFinished">
         <div class="py-1">
           <svg-icon
             name="infinite-load"
@@ -26,8 +26,9 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch, getCurrentInstance, onMounted } from 'vue'
 import useIntersectionObserver from './useIntersectionObserver'
+
 const props = defineProps({
   modelValue: {
     // 当前是否处于加载状态
@@ -40,17 +41,21 @@ const props = defineProps({
     required: true
   }
 })
+
 const emits = defineEmits(['update:modelValue', 'onLoad'])
 // loading元素
 const infiniteLoadEle = ref(null)
 const isIntersectingRef = ref(false)
 // 判断元素在 可视区域内或区域外相互切换时会触发回调
-useIntersectionObserver(infiniteLoadEle, ({ isIntersecting }) => {
-  // isIntersecting 表示元素是在可视范围内
-  // 触发onLoad条件 isIntersecting 为true; modelValue为false; isFinished为false
-  isIntersectingRef.value = isIntersecting
-  judgeAndEmit()
-})
+const { stop, start } = useIntersectionObserver(
+  infiniteLoadEle,
+  ({ isIntersecting }) => {
+    // isIntersecting 表示元素是在可视范围内
+    // 触发onLoad条件 isIntersecting 为true; modelValue为false; isFinished为false
+    isIntersectingRef.value = isIntersecting
+    judgeAndEmit()
+  }
+)
 
 //判断条件并且触发onLoad
 function judgeAndEmit() {
@@ -59,6 +64,9 @@ function judgeAndEmit() {
     emits('update:modelValue', true)
     emits('onLoad') // 触发加载
   }
+}
+const init = () => {
+  start()
 }
 
 watch(
@@ -69,6 +77,10 @@ watch(
     judgeAndEmit()
   }
 )
+defineExpose({
+  ...getCurrentInstance(),
+  init
+})
 </script>
 
 <style></style>

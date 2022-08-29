@@ -1,4 +1,4 @@
-import { watch, onUnmounted, isRef } from 'vue'
+import { watch, onBeforeUnmount, isRef } from 'vue'
 const useIntersectionObserver = (target, cb) => {
   let element = null
   let ios = null
@@ -31,13 +31,18 @@ const useIntersectionObserver = (target, cb) => {
   const stop = () => {
     ios && ios.unobserve(element)
   }
+  const start = (ele) => {
+    ios && ios.unobserve(ele || element)
+    ios && ios.observe(ele || element)
+  }
   // 卸载钱结束监听任何元素
-  onUnmounted(() => {
-    stop()
-  })
+  // onBeforeUnmount(() => {
+  //   stop()
+  // })
 
   return {
-    stop
+    stop,
+    start
   }
 }
 export default useIntersectionObserver

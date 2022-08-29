@@ -6,3 +6,12 @@ export const getPexels = (data) => {
     params: data
   })
 }
+/**
+ * 获取搜索提示
+ */
+export const getPexelsHint = (data) => {
+  return request({
+    url: '/pexels/hint',
+    params: data
+  })
+}

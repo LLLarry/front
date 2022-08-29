@@ -32,7 +32,7 @@ const onTouchmove = (index) => {
 }
 const onTouchEnd = (index) => {
   if (!isMoved) {
-    emits('handleSelectCategory', index)
+    emits('handleSelectCategory', {index, category: categorys.value[index]})
   }
 }
 </script>

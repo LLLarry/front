@@ -56,3 +56,19 @@ export const createRandomColor = () => {
   const randomNum = () => Math.floor(Math.random() * 256)
   return `rgba(${randomNum()}, ${randomNum()}, ${randomNum()})`
 }
+
+/**
+ * 防抖函数
+ * @param {*} cb
+ * @param {*} time
+ * @returns
+ */
+export const debounce = (cb, time) => {
+  let timer = null
+  return (...aug) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      cb && cb.apply(this, aug)
+    }, time)
+  }
+}

@@ -18,11 +18,11 @@
         class="text-base font-bold px-1.5 py-1 rounded-sm duration-300 hover:bg-zinc-200 text-zinc-900 mr-1 mb-1 cursor-pointer dark:text-zinc-500 dark:hover:text-zinc-300 dark:hover:bg-zinc-900"
         :class="{
           'bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300':
-            curretIndex === index
+            currentCategoryIndex === index
         }"
         v-for="(category, index) in categorys"
         :key="category.id"
-        @click="selcectCatrgory(index)"
+        @click="selcectCatrgory(category)"
       >
         {{ category.name }}
       </li>
@@ -43,7 +43,7 @@ const ulRef = ref(null)
 // ul的高度 [关闭高度、展开高度]
 const ulHeights = ref(['auto', 'auto'])
 // 选中菜单的索引
-const curretIndex = ref(0)
+const currentCategoryIndex = computed(() => store.getters.currentCategoryIndex)
 
 const categorys = computed(() => store.getters.categorys)
 // 监听categorys数据改变、改变之后在页面渲染之后获取展示ul展示和隐藏的高度
@@ -65,8 +65,8 @@ watch(
   }
 )
 
-const selcectCatrgory = (index) => {
-  curretIndex.value = index
+const selcectCatrgory = (category) => {
+  store.commit('app/changeCurrentCategory', category)
 }
 const ulHeightStyle = computed(() => ({
   height: isOpenCategory.value ? ulHeights.value[1] : ulHeights.value[0]

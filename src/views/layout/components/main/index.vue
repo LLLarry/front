@@ -1,5 +1,5 @@
 <template>
-  <div class="h-main">
+  <div class="h-main dark:bg-zinc-800 duration-500">
     <router-view />
     <Button type="primary" plain>搜索</Button>
     <Button type="warning" plain>搜索</Button>
