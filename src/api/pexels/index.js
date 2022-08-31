@@ -15,3 +15,13 @@ export const getPexelsHint = (data) => {
     params: data
   })
 }
+
+/**
+ * 获取主题
+ */
+export const getThemes = (data) => {
+  return request({
+    url: '/pexels/themes',
+    params: data
+  })
+}

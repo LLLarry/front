@@ -24,7 +24,7 @@
 import ListItem from './item/index.vue'
 import { getPexels } from '@/api/pexels'
 import { isMoboleTerminal } from '@/utils/flexible'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
 
 const store = useStore()
@@ -35,9 +35,9 @@ const loading = ref(false)
 const isFinished = ref(false)
 const infiniteListInstance = ref(null)
 const getInfiniteListInstance = (el) => {
-  console.log(el)
   infiniteListInstance.value = el
 }
+const searchText = computed(() => store.getters.searchText)
 
 let params = {
   page: 1,
@@ -72,21 +72,23 @@ const getPexelsData = async () => {
   }
 }
 
-const initParams = (newCategory) => {
+const initParams = (newCategory, searchText) => {
   ;(params = {
     ...params,
     page: 1,
-    categoryId: newCategory.id
+    categoryId: newCategory.id,
+    searchText
   }),
     (pexels.value = [])
   isFinished.value = false
   infiniteListInstance.value.init()
 }
 
+// 同时监听分类页的改变，和搜索内容的改变
 watch(
-  () => store.getters.currentCategory,
-  (newCategory) => {
-    initParams(newCategory)
+  [() => store.getters.currentCategory, searchText],
+  ([newCategory, st]) => {
+    initParams(newCategory, st)
   }
 )
 

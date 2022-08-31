@@ -3,9 +3,15 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import HelloWorld from '@/components/HelloWorld.vue'
 import { isMoboleTerminal } from '@/utils/flexible'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+const store = useStore()
+// 获取当前主题下对应的滚动条样式
+const scrollTheme = computed(() => store.getters.scrollTheme)
 </script>
 
 <template>
+  <!-- <confirm title="提示" content="123456"></confirm> -->
   <div class="w-screen h-screen fixed top-0 left-0">
     <router-view />
   </div>
@@ -22,5 +28,36 @@ import { isMoboleTerminal } from '@/utils/flexible'
 }
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
+}
+</style>
+
+<style lang="scss">
+/*定义滚动条高宽及背景
+
+ 高宽分别对应横竖滚动条的尺寸*/
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 16px;
+}
+
+/*定义滚动条轨道
+ 
+  内阴影+圆角*/
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: v-bind('scrollTheme.track.boxShadow');
+  border-radius: 10px;
+  background-color: v-bind('scrollTheme.track.bgc');
+}
+
+/*定义滑块
+ 
+  内阴影+圆角*/
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: v-bind('scrollTheme.thumb.boxShadow');
+  background-color: v-bind('scrollTheme.thumb.bgc');
 }
 </style>

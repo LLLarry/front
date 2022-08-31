@@ -53,3 +53,30 @@ export const THEME_LIGHT = 'THEME_LIGHT'
 export const THEME_DARK = 'THEME_DARK'
 // 跟随系统
 export const THEME_SYSTEM = 'THEME_SYSTEM'
+
+export const DEFAULT_SCROLL_THEME = {
+  dark: {
+    track: {
+      // 轨道颜色
+      bgc: '#333',
+      boxShadow: `inset 0 0 6px rgba(255,255,255,0.2)`
+    },
+    thumb: {
+      // 滑块颜色
+      bgc: '#333',
+      boxShadow: `inset 0 0 6px rgba(255,255,255,.6)`
+    }
+  },
+  light: {
+    track: {
+      // 轨道颜色
+      bgc: '#fefefe',
+      boxShadow: `inset 0 0 6px rgba(0,0,0,0.2)`
+    },
+    thumb: {
+      // 滑块颜色
+      bgc: '#fefefe',
+      boxShadow: `inset 0 0 6px rgba(0,0,0,0.3)`
+    }
+  }
+}

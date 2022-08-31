@@ -1,12 +1,23 @@
 <template>
   <div class="h-header flex items-center px-2 dark:bg-zinc-800 duration-500">
+    <!-- logo -->
     <header-logo />
-    <search v-model="keywords" @confirm="onConfirm" @input="onInput">
+
+    <!-- 搜索区域 -->
+    <search v-model="keywords" @confirm="onConfirm">
       <template #dropdown>
-        <Hint :searchText="keywords" @item-click="itemClick" />
+        <Hint :searchText="keywords" @item-click="itemClick" v-if="keywords" />
+        <template v-else>
+          <History @itemClick="itemClick" />
+          <Theme />
+        </template>
       </template>
     </search>
+
+    <!-- 主题选择 -->
     <header-theme />
+
+    <!-- 个人中心 -->
     <header-my />
   </div>
 </template>
@@ -16,15 +27,23 @@ import HeaderLogo from './header-logo.vue'
 import HeaderTheme from './header-theme.vue'
 import HeaderMy from './header-my.vue'
 import Hint from './hint.vue'
-import { ref } from 'vue'
+import History from './history.vue'
+import Theme from './theme.vue'
+import { ref, watch } from 'vue'
+import { useStore } from 'vuex'
+const store = useStore()
 const keywords = ref('')
-const onConfirm = (...v) => {
-  // console.log(v)
+const onConfirm = ({ value }) => {
+  if (!value) return false
+  // 保存搜索历史到vuex中
+  store.commit('search/addHistory', value)
 }
-const onInput = (...v) => {
-  // console.log(v)
-}
+
 const itemClick = (v) => {
   keywords.value = v
 }
+
+watch(keywords, (v) => {
+  store.commit('app/changeSearchText', v)
+})
 </script>

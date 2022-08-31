@@ -54,6 +54,7 @@ const defineSize = {
 
 <script setup>
 import { computed, ref, useSlots } from 'vue'
+import SvgIcon from '../svg-icon/index.vue'
 // const slot = useSlots()
 // console.log(slot.default)
 const mouseIsOver = ref(false)

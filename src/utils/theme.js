@@ -23,7 +23,6 @@ export const useTheme = () => {
   watch(
     [() => store.getters.themeType, systemTheme],
     ([themeType, st]) => {
-      console.log(themeType, st)
       // 根据themeType获取到对应的class类名
       let classStr = ''
       switch (themeType) {
@@ -42,6 +41,8 @@ export const useTheme = () => {
       html.classList.remove('light', 'dark')
       if (classStr) {
         html.classList.add(classStr)
+        // 修改store中保存的主题色
+        store.commit('theme/changeTheme', classStr)
       }
     },
     {

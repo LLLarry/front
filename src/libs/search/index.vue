@@ -3,10 +3,12 @@
     class="search-com flex items-center flex-1 relative p-[6px] rounded-full hover:bg-red-50 duration-500 dark:hover:bg-red-50/30"
     @click.stop.prevent
   >
+    <!-- 前置icon -->
     <svg-icon
       name="search"
       class="w-1.5 h-1.5 absolute translate-y-[-50%] top-[50%] left-3 dark:fill-zinc-400"
     />
+    <!-- 搜索input -->
     <input
       :value="modelValue"
       type="text"
@@ -15,6 +17,7 @@
       @blur.stop="onBlur"
       @input.stop="onInput"
       @change.stop="onChange"
+      @keydown.enter.stop="onConfirm"
       class="flex-1 bg-zinc-100 rounded-full h-[44px] px-5 border-2 border-zinc- text-sm font-semibold outline-none hover:border-red-300 hover:bg-white placeholder:text-sm duration-500 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
     />
     <!-- 清空按钮 -->
@@ -32,6 +35,7 @@
       class="search-btn cursor-pointer w-[40px] h-[40px] rounded-full absolute translate-y-[-50%] top-[50%] right-[12px] opacity-0 dark:bg-transparent dark:border-transparent dark:hover:bg-zinc-900 dark:text-zinc-500"
       @click.stop="onConfirm"
     />
+    <!-- 搜索提示 -->
     <transition name="search-tip">
       <div
         class="absolute z-50 shadow left-0 right-0 bottom-0 rounded-sm bg-white border border-zinc-300 translate-y-full p-1 max-h-[270px] overflow-auto dark:bg-zinc-800 duration-300 dark:border-zinc-600"

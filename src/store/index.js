@@ -3,15 +3,16 @@ import getters from './getters'
 import categorys from './modules/categorys'
 import app from './modules/app'
 import theme from './modules/theme'
+import search from './modules/search'
 // import vuexPresisted from './plugins/vuex-presisted'
 import createPersistedState from 'vuex-persistedstate'
 const store = createStore({
   getters,
-  modules: { categorys, theme, app },
+  modules: { categorys, theme, app, search },
   plugins: [
     createPersistedState({
       key: '__front__',
-      paths: ['categorys', 'theme']
+      paths: ['categorys', 'theme', 'search']
     })
   ]
 })

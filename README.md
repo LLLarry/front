@@ -1752,7 +1752,7 @@ const themes = [
 // 选中主题
 const handleSelect = (theme) => {
   // 修改vuex中的主题
-  store.commit('theme/changeTheme', theme.type)
+  store.commit('theme/changeThemeType', theme.type)
 }
 
 // 当前选中的模式的icon图标

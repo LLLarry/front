@@ -3,12 +3,16 @@ export default {
   namespaced: true,
   state() {
     return {
-      themeType: THEME_LIGHT
+      themeType: THEME_LIGHT,
+      theme: 'light'
     }
   },
   mutations: {
-    changeTheme(state, themeType) {
+    changeThemeType(state, themeType) {
       state.themeType = themeType
+    },
+    changeTheme(state, theme) {
+      state.theme = theme
     }
   }
 }

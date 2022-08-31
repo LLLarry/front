@@ -35,7 +35,7 @@
 
 <script setup>
 import { THEME_LIGHT, THEME_DARK, THEME_SYSTEM } from '@/constants'
-import { computed } from 'vue-demi'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 const themes = [
@@ -62,7 +62,7 @@ const themes = [
 // 选中主题
 const handleSelect = (theme) => {
   // 修改vuex中的主题
-  store.commit('theme/changeTheme', theme.type)
+  store.commit('theme/changeThemeType', theme.type)
 }
 
 // 当前选中的模式的icon图标
@@ -72,6 +72,7 @@ const selectIconc = computed(() => {
   // 对应的themes中的项
   const item = themes.find((theme) => theme.type === themeType)
   // 返回选中项的图标
+  console.log(';item?.icon', themeType)
   return item?.icon
 })
 </script>
