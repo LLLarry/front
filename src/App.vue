@@ -5,14 +5,16 @@ import HelloWorld from '@/components/HelloWorld.vue'
 import { isMoboleTerminal } from '@/utils/flexible'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+import TestGSAP from '@/components/testGSAP/index.vue'
+
 const store = useStore()
 // 获取当前主题下对应的滚动条样式
 const scrollTheme = computed(() => store.getters.scrollTheme)
 </script>
 
 <template>
-  <!-- <confirm title="提示" content="123456"></confirm> -->
-  <div class="w-screen h-screen fixed top-0 left-0">
+  <!-- <TestGSAP /> -->
+  <div class=" w-full h-full">
     <router-view />
   </div>
 </template>

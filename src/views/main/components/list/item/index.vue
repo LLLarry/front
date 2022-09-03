@@ -3,8 +3,12 @@
     class="bg-white dark:bg-zinc-900 dark:xl:bg-zinc-800 rounded overflow-hidden"
     :style="{ width: width + 'px' }"
   >
-    <div class="rounded w-full cursor-zoom-in relative group">
+    <div
+      class="rounded w-full cursor-zoom-in relative group"
+      @click="handleSelectItem"
+    >
       <img
+        ref="imgEle"
         :src="pexel.photo"
         alt=""
         class="w-full rounded"
@@ -13,7 +17,7 @@
         v-lazy
       />
       <div
-        class="absolute left-0 top-0 right-0 bottom-0 opacity-0 group-hover:bg-zinc-800/60 group-hover:opacity-100 duration-300"
+        class="hidden xl:block absolute left-0 top-0 right-0 bottom-0 opacity-0 group-hover:bg-zinc-800/60 group-hover:opacity-100 duration-300"
       >
         <!-- 分享 -->
         <Button
@@ -36,6 +40,7 @@
           type="default"
           size="small"
           class="absolute left-1.5 bottom-1.5 bg-zinc-200/50 border-none dark:bg-zinc-900/60"
+          @click="handleDownload(pexel)"
         >
           <svg-icon
             name="download"
@@ -47,6 +52,7 @@
           type="default"
           size="small"
           class="absolute right-1.5 bottom-1.5 bg-zinc-200/50 border-none dark:bg-zinc-900/60"
+          @click="handleFullScreen"
         >
           <svg-icon
             name="full"
@@ -72,8 +78,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { createRandomColor } from '@/utils'
+import { saveAs } from 'file-saver'
+import Message from '@/libs/message/index'
+import { useFullscreen } from '@vueuse/core'
 
 const props = defineProps({
   pexel: {
@@ -86,6 +95,7 @@ const props = defineProps({
     type: Number
   }
 })
+const emits = defineEmits(['selectItem'])
 
 // 图片预加载时的宽高
 const imgStyle = computed(() => {
@@ -96,6 +106,32 @@ const imgStyle = computed(() => {
     height: height + 'px'
   }
 })
+const handleDownload = (pexel) => {
+  Message.success('下载成功')
+  setTimeout(() => {
+    saveAs(pexel.photoDownLink)
+  }, 100)
+}
+const imgEle = ref(null)
+const { isFullscreen, enter, exit, toggle } = useFullscreen(imgEle)
+const handleFullScreen = () => {
+  imgEle.value.style.backgroundColor = 'transparent'
+  enter()
+}
+
+// 选中当前项
+const handleSelectItem = () => {
+  // 获取图片中间路基浏览器左边和顶部的距离
+  const { left, top, width, height } = imgEle.value?.getBoundingClientRect()
+  const translateX = left + width / 2
+  const translateY = top + height / 2
+  // return
+  emits('selectItem', {
+    ...props.pexel,
+    translateX,
+    translateY
+  })
+}
 </script>
 
 <style></style>

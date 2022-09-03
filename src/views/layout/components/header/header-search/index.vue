@@ -1,10 +1,10 @@
 <template>
   <div class="h-header flex items-center px-2 dark:bg-zinc-800 duration-500">
     <!-- logo -->
-    <header-logo />
+    <header-logo class="guide-logo" />
 
     <!-- 搜索区域 -->
-    <search v-model="keywords" @confirm="onConfirm">
+    <search v-model="keywords" @confirm="onConfirm" class="guide-search">
       <template #dropdown>
         <Hint :searchText="keywords" @item-click="itemClick" v-if="keywords" />
         <template v-else>
@@ -15,10 +15,10 @@
     </search>
 
     <!-- 主题选择 -->
-    <header-theme />
+    <header-theme class="guide-theme" />
 
     <!-- 个人中心 -->
-    <header-my />
+    <header-my class="guide-my" />
   </div>
 </template>
 

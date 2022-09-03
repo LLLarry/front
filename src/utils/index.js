@@ -1,4 +1,5 @@
 import md5 from 'md5'
+import { ref } from 'vue'
 
 export const getSecret = () => {
   const codetype = Number.parseInt(Date.now() / Math.pow(10, 3))
@@ -71,4 +72,61 @@ export const debounce = (cb, time) => {
       cb && cb.apply(this, aug)
     }, time)
   }
+}
+
+/**
+ * 可控定时器
+ * @param {*} time
+ * @param {*} cb
+ * @returns
+ */
+export const contralTimeout = (time, cb) => {
+  // 是否正在启动
+  const isStart = ref(false)
+  const isFinish = ref(false)
+  let relTime = 0
+  let timer = setInterval(() => {
+    if (isStart.value) {
+      relTime += 5
+    }
+    if (relTime >= time) {
+      clearInterval(timer)
+      isFinish.value = true
+      cb && cb()
+    }
+  }, 5)
+  const stop = () => {
+    isStart.value = false
+  }
+  const start = () => {
+    isStart.value = true
+  }
+
+  return {
+    stop,
+    start,
+    isStart,
+    isFinish
+  }
+}
+
+
+export const useMobileScroll = (el) => {
+  var overscroll = function(el) {
+    el.addEventListener('touchstart', function() {
+      var top = el.scrollTop
+        , totalScroll = el.scrollHeight
+        , currentScroll = top + el.offsetHeight;
+      if(top === 0) {
+        el.scrollTop = 1;
+      } else if(currentScroll === totalScroll) {
+        el.scrollTop = top - 1;
+      }
+    });
+    el.addEventListener('touchmove', function(evt) {
+      if(el.offsetHeight < el.scrollHeight)
+        evt._isScroller = true;
+    });
+  }
+  overscroll(el);
 }

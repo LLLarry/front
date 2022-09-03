@@ -13,11 +13,22 @@
         :isPicturePreReading="false"
       >
         <template v-slot="{ item, width }">
-          <list-item :pexel="item" :width="width" />
+          <list-item :pexel="item" :width="width" @selectItem="selectItem" />
         </template>
       </water-fall>
     </infinite-list>
   </div>
+  <!-- 图片详情 -->
+  <transition
+    :css="false"
+    @before-enter="onBeforeEnter"
+    @enter="onEnter"
+    @after-enter="onAfterEnter"
+    @leave="onLeave"
+    @after-leave="onAfterLeave"
+  >
+    <Pins :id="currentItem.id" v-if="pinsVisible" />
+  </transition>
 </template>
 
 <script setup>
@@ -26,6 +37,9 @@ import { getPexels } from '@/api/pexels'
 import { isMoboleTerminal } from '@/utils/flexible'
 import { ref, watch, computed } from 'vue'
 import { useStore } from 'vuex'
+import Pins from '@/views/pins/components/pins.vue'
+import gsap from 'gsap'
+import { useEventListener } from '@vueuse/core'
 
 const store = useStore()
 const pexels = ref([])
@@ -102,6 +116,81 @@ watch(
 //     })
 //   }
 // )
+// 选中的item信息
+const currentItem = ref({})
+// 选中item
+const selectItem = (item) => {
+  currentItem.value = item
+  // 修改页面地址
+  window.history.pushState(null, '', '/pins/' + item.id)
+}
+// 监听页面回退
+useEventListener('popstate', () => {
+  delete currentItem.value.id
+})
+const pinsVisible = computed(() => currentItem.value.id !== void 0)
+// pins动画钩子 -- 动画执行之前
+const onBeforeEnter = (el) => {
+  gsap.set(el, {
+    scaleX: 0.2,
+    scaleY: 0.2,
+    transformOrigin: '0 0',
+    translateX: currentItem.value.translateX,
+    translateY: currentItem.value.translateY,
+    opacity: 0
+  })
+}
+
+// pins动画钩子 -- 动画执行过程
+const onEnter = (el, done) => {
+  el.__gsap__ = gsap.to(el, {
+    duration: 0.4,
+    scaleX: 1,
+    scaleY: 1,
+    transformOrigin: '0 0',
+    translateX: 0,
+    translateY: 0,
+    opacity: 1,
+    onComplete: done
+  })
+}
+
+// pins动画钩子 -- 动画离开过程
+const onLeave = (el, done) => {
+  el.__gsap__.reverse()
+  setTimeout(() => {
+    done()
+  }, el.__gsap__._dur * 1500)
+}
+
+const onAfterLeave = (el) => {
+  currentItem.value = {}
+}
+
+// const onEnter = (el, done) => {
+//   el.__gsap__ = gsap.to(el, {
+//     duration: 0.3999,
+//     scaleX: 1,
+//     scaleY: 1,
+//     translateX: 0,
+//     translateY: 0,
+//     opacity: 1,
+//     onComplete: done
+//   })
+// }
+
+// const onBeforeLeave = () => {}
+// // pins动画钩子 -- 动画离开过程
+// const onLeave = (el, done) => {
+//   el.__gsap__.reverse()
+//   setTimeout(() => {
+//     done()
+//   }, el.__gsap__._dur * 1500)
+// }
+
+// const onAfterLeave = (el) => {
+//   currentItem.value = {}
+// }
 </script>
 
 <style></style>

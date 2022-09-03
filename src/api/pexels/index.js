@@ -25,3 +25,12 @@ export const getThemes = (data) => {
     params: data
   })
 }
+
+/**
+ * pins详情
+ */
+ export const getPinsById = (data) => {
+  return request({
+    url: '/pexels/' + data.id
+  })
+}
