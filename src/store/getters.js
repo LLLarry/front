@@ -24,5 +24,14 @@ export default {
   },
   searchText(state) {
     return state.app.searchText
+  },
+  token (state) {
+    return state.user.token
+  },
+  userInfo (state) {
+    return state.user.userInfo
+  },
+  isLogin (state) {
+    return Object.keys(state.user.userInfo).length !== 0
   }
 }

@@ -18,3 +18,15 @@ export const validatePassword = (value) => {
   if (value.length < 6 || value.length > 12) return '密码只能为6-12位'
   return true
 }
+
+/**
+ * 验证密码
+ * @param {*} value 
+ * @param {*} list 
+ */
+export const validateComfirmPassword = (value, list) => {
+  const v = validatePassword(value)
+  if (typeof v === 'string') return v
+  if (value !== list[0]) return '两次输入的密码不一致'
+  return true
+}

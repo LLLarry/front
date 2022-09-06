@@ -4,14 +4,15 @@
       icon="profile"
       type="danger"
       class="w-4 h-4 rounded-sm"
-      v-if="false"
+      v-if="!isLogin"
+      @click="handleGoToLogin"
     />
-    <popover trigger="hover" placement="bottom-end">
+    <popover trigger="hover" placement="bottom-end" v-else>
       <template #reference>
         <div class="flex items-center">
           <img
             v-lazy
-            src="https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png"
+            :src="userInfo.avatar || 'https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png'"
             class="w-4 h-4 rounded-sm"
             alt=""
           />
@@ -30,6 +31,7 @@
           v-for="menu in menus"
           :key="menu.id"
           class="flex items-center p-1 hover:bg-zinc-100/60 duration-300 dark:hover:bg-zinc-700 dark:text-zinc-300"
+          @click="handleClickMenu(menu)"
         >
           <svg-icon
             :name="menu.icon"
@@ -43,6 +45,15 @@
 </template>
 
 <script setup>
+import { useStore } from 'vuex'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import confirm from '@/libs/confirm'
+const store = useStore()
+const router = useRouter()
+const isLogin =  computed(() => store.getters.isLogin)
+const userInfo = computed(() => store.getters.userInfo)
+
 const menus = [
   {
     id: 0,
@@ -63,6 +74,20 @@ const menus = [
     path: ''
   }
 ]
+
+const handleClickMenu = ({ id }) => {
+  if (id === 2) { // 退出登录
+    confirm({
+      content: '确认退出登录吗？'
+    }).then(() => {
+      store.dispatch('user/handleLogout')
+    })
+  }
+}
+
+const handleGoToLogin = () => {
+  router.push('/login')
+}
 </script>
 
 <style></style>

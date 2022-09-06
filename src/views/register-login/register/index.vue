@@ -27,13 +27,13 @@
     <div
       class="xl:w-[380px] w-full bg-white dark:bg-zinc-800 xl:dark:bg-zinc-900 duration-500 mt-4 xl:shadow-sm px-3 py-3 xl:rounded-sm mx-auto"
     >
-      <!-- 账号登录 -->
+      <!-- 账号注册 -->
       <div
         class="text-red-600 font-semibold text-center dark:text-zinc-500 hidden xl:block text-sm"
       >
-        账号登录
+        账号注册
       </div>
-      <!-- 登录表单 -->
+      <!-- 注册表单 -->
       <vee-form class="w-full mt-4 text-[0px]" @submit="onSubmit">
         <vee-filed
           v-model="inputValues.username"
@@ -60,29 +60,29 @@
           class="text-sm text-red-600 mt-0.5 block"
         />
 
+         <vee-filed
+          v-model="inputValues.confirmPassword"
+          name="confirmPassword"
+          rules="validateComfirmPassword:@password"
+          placeholder="确认密码"
+          type="password"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 mt-3 dark:text-zinc-300 border-zinc-300 font-bold text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 focus:border-red-600"
+        />
+        <vee-error-message
+          name="confirmPassword"
+          class="text-sm text-red-600 mt-0.5 block"
+        />
+
         <div class=" text-right">
-          <router-link to="/register" tag="a"  class=" hover:text-red-600 select-none no-underline text-zinc-500 dark:text-zinc-400 duration-500 cursor-pointer text-xs mt-3 inline-block">去注册</router-link>
+          <router-link to="/login" tag="a"  class=" hover:text-red-600 select-none no-underline text-zinc-500 dark:text-zinc-400 duration-500 cursor-pointer text-xs mt-3 inline-block">去登录</router-link>
         </div>
         <Button
           class="bg-red-600 mt-4 border-red-600 w-full hover:bg-red-600 focus:bg-red-600 hover:border-red-700 focus:border-red-700 active:border-red-700 duration-300 dark:bg-zinc-900 dark:border-zinc-900 xl:dark:bg-zinc-800 xl:dark:border-zinc-800 py-1"
           :loading="loading"
-          >登录</Button
+          >立即注册</Button
         >
       </vee-form>
 
-      <div class="mt-10">
-        <div class="flex justify-around">
-          <svg-icon
-            class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
-            name="qq"
-          ></svg-icon>
-
-          <svg-icon
-            class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
-            name="wexin"
-          ></svg-icon>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -100,20 +100,24 @@
 import {
   Form as VeeForm,
   Field as VeeFiled,
-  ErrorMessage as VeeErrorMessage
+  ErrorMessage as VeeErrorMessage,
+  defineRule
 } from 'vee-validate'
-import { validateName, validatePassword } from '../validate'
+import { validateName, validatePassword, validateComfirmPassword } from '../validate'
 import SliderCaptchaVue from '../components/slider-captcha/index.vue'
 import { getCaptcha } from '@/api/sys'
 import { ref } from 'vue'
 import { useStore } from 'vuex'
-import { LOGIN_TYPE_USERNAME } from '@/constants'
+
 
 const store = useStore()
 const inputValues = ref({})
 const loading = ref(false)
 // 人类行为认证组件是否展示
 const sliderCaptchaVisible = ref(false)
+
+// 插入规则
+defineRule('validateComfirmPassword', validateComfirmPassword)
 
 const onSubmit = (v) => {
   sliderCaptchaVisible.value = true
@@ -128,11 +132,9 @@ const onSuccess = async (arr) => {
     })
 
     if (!flag) return false
+    const { confirmPassword, ...v } = inputValues.value
     // 在这里发送登录请求
-    await store.dispatch('user/handleLogin', {
-      ...inputValues.value,
-      loginType: LOGIN_TYPE_USERNAME
-    })
+    await store.dispatch('user/handleRegister', v)
   } finally {
     loading.value = false
   }
