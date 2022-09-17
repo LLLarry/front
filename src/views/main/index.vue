@@ -9,11 +9,30 @@
       <list />
     </div>
   </div>
+
+  <trigger-menu
+    class="fixed w-[280px] left-[50%] bottom-[30px] translate-x-[-50%]"
+    v-if="isMoboleTerminal"
+  >
+    <trigger-menu-item icon="home" to="/"> 首页 </trigger-menu-item>
+    <trigger-menu-item icon="vip" v-if="isLogin"> VIP </trigger-menu-item>
+    <trigger-menu-item icon="profile" @click="handleProfile">
+      {{ isLogin ? '我的' : '去登陆' }}
+    </trigger-menu-item>
+  </trigger-menu>
 </template>
 
 <script setup>
 import Navigation from './components/navigation/index.vue'
 import List from './components/list/index.vue'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+import { isMoboleTerminal } from '@/utils/flexible'
+const store = useStore()
+const isLogin = computed(() => !!store.getters.token)
+const handleProfile = () => {
+  console.log(123)
+}
 </script>
 
 <style></style>

@@ -81,8 +81,11 @@ export const DEFAULT_SCROLL_THEME = {
   }
 }
 
-
 // 登录类型
 export const LOGIN_TYPE_USERNAME = 'username'
 export const LOGIN_TYPE_QQ = 'qq'
 export const LOGIN_TYPE_WX = 'wx'
+
+// 阿里oss配置
+export const REGION = 'oss-cn-beijing'
+export const BUCKET = 'imooc-front'

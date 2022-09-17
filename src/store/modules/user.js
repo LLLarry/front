@@ -5,22 +5,22 @@ import router from '@/router'
 import { LOGIN_TYPE_USERNAME } from '@/constants'
 export default {
   namespaced: true,
-  state () {
+  state() {
     return {
       token: '',
       userInfo: {}
     }
   },
   mutations: {
-    setToken (state, token) {
+    setToken(state, token) {
       state.token = token
     },
-    setUserInfo (state, userInfo) {
+    setUserInfo(state, userInfo) {
       state.userInfo = userInfo
     }
   },
   actions: {
-    async handleRegister (context, payload) {
+    async handleRegister(context, payload) {
       // 注册用户
       await registerUser({
         ...payload,
@@ -29,10 +29,10 @@ export default {
       // 登录用户
       context.dispatch('handleLogin', {
         ...payload,
-        loginType: payload.loginType ||  LOGIN_TYPE_USERNAME
+        loginType: payload.loginType || LOGIN_TYPE_USERNAME
       })
     },
-    async handleLogin (context, payload) {
+    async handleLogin(context, payload) {
       try {
         // 登录、获取token 当有password时，进行md5加密
         const { token } = await getToken({
@@ -44,14 +44,20 @@ export default {
         // 获取用户信息
         const userInfo = await getProfile()
         context.commit('setUserInfo', userInfo)
-        Message.success(`欢迎您 ${userInfo.vipLevel ? `最贵的VIP${userInfo.vipLevel}用户 ${userInfo.nickname}` : userInfo.nickname}`)
+        Message.success(
+          `欢迎您 ${
+            userInfo.vipLevel
+              ? `最贵的VIP${userInfo.vipLevel}用户 ${userInfo.nickname}`
+              : userInfo.nickname
+          }`
+        )
         // 跳转到首页
         router.replace('/')
       } catch (error) {
         return Promise.reject(error)
       }
     },
-    handleLogout (context) {
+    handleLogout(context) {
       // 清除token
       context.commit('setToken', '')
       // 清除user

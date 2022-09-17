@@ -8,6 +8,7 @@ import { useTheme } from '@/utils/theme'
 import libs from '@/libs'
 import directives from '@/directives'
 import 'virtual:svg-icons-register'
+import './premission'
 
 useREM()
 useTheme()

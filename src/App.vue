@@ -14,7 +14,7 @@ const scrollTheme = computed(() => store.getters.scrollTheme)
 
 <template>
   <!-- <TestGSAP /> -->
-  <div class=" w-full h-full">
+  <div class="w-full h-full">
     <router-view />
   </div>
 </template>

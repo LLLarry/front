@@ -12,7 +12,10 @@
         <div class="flex items-center">
           <img
             v-lazy
-            :src="userInfo.avatar || 'https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png'"
+            :src="
+              userInfo.avatar ||
+              'https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png'
+            "
             class="w-4 h-4 rounded-sm"
             alt=""
           />
@@ -51,7 +54,7 @@ import { useRouter } from 'vue-router'
 import confirm from '@/libs/confirm'
 const store = useStore()
 const router = useRouter()
-const isLogin =  computed(() => store.getters.isLogin)
+const isLogin = computed(() => store.getters.isLogin)
 const userInfo = computed(() => store.getters.userInfo)
 
 const menus = [
@@ -76,12 +79,16 @@ const menus = [
 ]
 
 const handleClickMenu = ({ id }) => {
-  if (id === 2) { // 退出登录
+  if (id === 2) {
+    // 退出登录
     confirm({
       content: '确认退出登录吗？'
     }).then(() => {
       store.dispatch('user/handleLogout')
     })
+  } else if (id === 0) {
+    // 个人信息
+    router.push('/profile')
   }
 }
 

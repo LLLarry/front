@@ -40,6 +40,8 @@ onMounted(() => {
     failedText: '再试一次',
     barText: '向右滑动填充拼图',
     repeatIcon: 'fa fa-redo',
+    setSrc: () =>
+      'https://images.pexels.com/photos/9909478/pexels-photo-9909478.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     onSuccess: function (arr) {
       console.log('成功')
       emits(EMITS_SUCCESS, arr)

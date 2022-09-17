@@ -60,8 +60,13 @@
           class="text-sm text-red-600 mt-0.5 block"
         />
 
-        <div class=" text-right">
-          <router-link to="/register" tag="a"  class=" hover:text-red-600 select-none no-underline text-zinc-500 dark:text-zinc-400 duration-500 cursor-pointer text-xs mt-3 inline-block">去注册</router-link>
+        <div class="text-right">
+          <router-link
+            to="/register"
+            tag="a"
+            class="hover:text-red-600 select-none no-underline text-zinc-500 dark:text-zinc-400 duration-500 cursor-pointer text-xs mt-3 inline-block"
+            >去注册</router-link
+          >
         </div>
         <Button
           class="bg-red-600 mt-4 border-red-600 w-full hover:bg-red-600 focus:bg-red-600 hover:border-red-700 focus:border-red-700 active:border-red-700 duration-300 dark:bg-zinc-900 dark:border-zinc-900 xl:dark:bg-zinc-800 xl:dark:border-zinc-800 py-1"
@@ -94,6 +99,10 @@
       @close="onClose"
     />
   </transition>
+
+  <div>
+    <h1>input</h1>
+  </div>
 </template>
 
 <script setup>
