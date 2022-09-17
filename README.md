@@ -1752,7 +1752,7 @@ const themes = [
 // 选中主题
 const handleSelect = (theme) => {
   // 修改vuex中的主题
-  store.commit('theme/changeThemeType', theme.type)
+  store.commit('theme/changeTheme', theme.type)
 }
 
 // 当前选中的模式的icon图标
@@ -2851,13 +2851,18 @@ const useIntersectionObserver = (target, cb) => {
   const stop = () => {
     ios && ios.unobserve(element)
   }
+  const start = (ele) => {
+    ios && ios.unobserve(ele || element)
+    ios && ios.observe(ele || element)
+  }
   // 卸载钱结束监听任何元素
   onUnmounted(() => {
     stop()
   })
 
   return {
-    stop
+    stop,
+    start
   }
 }
 export default useIntersectionObserver
@@ -2874,8 +2879,8 @@ export default useIntersectionObserver
     <!-- 展示列表内容插槽 -->
     <slot />
     <!-- 底部 ---加载中插槽 -->
-    <div ref="infiniteLoadEle">
-      <slot name="loading" v-if="!isFinished && modelValue">
+    <div ref="infiniteLoadEle" class="py-0.5">
+      <slot name="loading" v-if="!isFinished">
         <div class="py-1">
           <svg-icon
             name="infinite-load"
@@ -2897,8 +2902,9 @@ export default useIntersectionObserver
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch, getCurrentInstance } from 'vue'
 import useIntersectionObserver from './useIntersectionObserver'
+
 const props = defineProps({
   modelValue: {
     // 当前是否处于加载状态
@@ -2911,17 +2917,21 @@ const props = defineProps({
     required: true
   }
 })
+
 const emits = defineEmits(['update:modelValue', 'onLoad'])
 // loading元素
 const infiniteLoadEle = ref(null)
 const isIntersectingRef = ref(false)
 // 判断元素在 可视区域内或区域外相互切换时会触发回调
-useIntersectionObserver(infiniteLoadEle, ({ isIntersecting }) => {
-  // isIntersecting 表示元素是在可视范围内
-  // 触发onLoad条件 isIntersecting 为true; modelValue为false; isFinished为false
-  isIntersectingRef.value = isIntersecting
-  judgeAndEmit()
-})
+const { stop, start } = useIntersectionObserver(
+  infiniteLoadEle,
+  ({ isIntersecting }) => {
+    // isIntersecting 表示元素是在可视范围内
+    // 触发onLoad条件 isIntersecting 为true; modelValue为false; isFinished为false
+    isIntersectingRef.value = isIntersecting
+    judgeAndEmit()
+  }
+)
 
 //判断条件并且触发onLoad
 function judgeAndEmit() {
@@ -2930,6 +2940,11 @@ function judgeAndEmit() {
     emits('update:modelValue', true)
     emits('onLoad') // 触发加载
   }
+}
+    
+// init的作用？ 当我们在上一个分类加载完毕后、切换至下个分类页，这个时候useIntersectionObserver一直都在可视范围内，所以切换后并不会重新请求；为了解决这个问题，在父组件中当用户切换分类后手动执行初始化函数init; init作用就是将监听的元素，取消监听、再开始监听；这样就会在开始监听时触发一次回调执行
+const init = () => {
+  start()
 }
 
 watch(
@@ -2940,6 +2955,12 @@ watch(
     judgeAndEmit()
   }
 )
+
+// 向父组件暴露出的属性
+defineExpose({
+  ...getCurrentInstance(),
+  init
+})
 </script>
 
 <style></style>
@@ -3390,25 +3411,2735 @@ const onTouchEnd = (index) => {
 
 
 
+### 27、解决infinite-list bug- 切换分类页后不能重新请求的问题
+
+![20220829_114732 (3)](images/20220829_114732%20(3).gif)
 
 
 
 
 
+我们先看一下这个bug、如上图所示： **在某一个分类中滚动到最后，然后切换至其他的分类不能发起去请求的问题**
+
+
+
+这个问题的本质就是：
+
+​	首先我们的`infinite-list`组件内是通过**`IntersectionObserver`来监听`loading`元素是否在可视范围内**
+
+​	**如果在可视范围内则不发送请求、反之发送请求**
+
+
+
+明确了发送请求的逻辑则不难得知、上面的bug不发送请求的原因是因为：
+
+* 当加载到底部时`loading`元素在**可视范围内**
+* 当切换分类标签后、`loading`元素依然在**可视范围内**、所以没有发送请求
+
+
+
+**解决思路：**
+
+`IntersectionObserver`创建的实例对象中有两个`api`: `observe` 和 `unobserve`分别是监听元素和移除监听的两个api
+
+我们可以在`infinite-list`创建一个`init函数`
+
+**init函数的作用**
+
+* 先通过`unobserve`移除监听的`loading`元素； 再通过`observe`监听`loading`元素
+
+这样监听时会触发一次元素在可视范围内的回调
+
+```js
+const start = (ele) => { // start === init;
+    ios && ios.unobserve(ele || element)
+    ios && ios.observe(ele || element)
+  }
+```
+
+
+
+### 28、父组件获取子组件的实例 - 调用属性获取方法
+
+在`vue2`中父组件可以通过`ref`属性直接获取到子组件的实例；从而可以调取子组件内部的属性和方法
+
+但是在`vue3`是不同的，通过`ref`获取组件实例要通过**回调函数**获取，并且还要通过在子组件中[`defineExpose`](https://cn.vuejs.org/api/sfc-script-setup.html#defineexpose)向外暴露竖向和方法；
+
+另一个api是`getCurrentInstance`
+
+**getCurrentInstance**获取当前组件的实例，注意只能获取options Api中的数据
 
 
 
 
 
+Child.vue
+
+```vue
+
+<script setup>
+import { nextTick, ref, watch, getCurrentInstance } from 'vue'
+    
+const init = () => {
+  console.log('child init')
+}
+// 向外界暴露属性和方法
+defineExpose({
+  ...getCurrentInstance(),
+  init: 
+})
+</script>
+```
+
+Father.vue
+
+```vue
+<template>
+	<Child :ref="getChildInstance"></Child>
+</template>
+<script setup>
+import { nextTick, ref, watch, getCurrentInstance } from 'vue'
+const childInstance = ref(null)
+// 获取子组件实例
+const getChildInstance = (el) => {
+    childInstance.value = el
+    childInstance.value.init() // 'child init'
+}
+</script>
+```
+
+
+
+> 注意子组件如果想要通过`getCurrentInstance().ctx.$parent`获取父组件实例也只能获取到options Api 如果要获取到setup函数中的数据，父组件也需要`defineExpose`向外界导出可以访问的属性或者方法
 
 
 
 
 
+### 29、设置不同主题下的滚动条的样式
+
+在不同主题下滚动条样式如下：
+
+**极简白**
+
+![image-20220830100938727](images/image-20220830100938727.png)
+
+**极夜黑**
+
+![image-20220830100959365](images/image-20220830100959365.png)
+
+**实现思路：**
+
+* 1、在vuex中获取当前正在使用的主题色
+* 2、在constants中取出定义的不同主题下的滚动条的颜色样式、结合主题色生成当前主题的滚动条颜色
+* 3、在`APP.vue`中利用vue3中新添加的属性 [**CSS 中的 `v-bind()`**](https://cn.vuejs.org/api/sfc-css-features.html#v-bind-in-css)给滚动条动态绑定颜色
+
+**开始实现**：
+
+constants/index.js
+
+```js
+// 定义默认滚动主题
+export const DEFAULT_SCROLL_THEME = {
+  dark: {
+    track: {
+      // 轨道颜色
+      bgc: '#333',
+      boxShadow: `inset 0 0 6px rgba(255,255,255,0.2)`
+    },
+    thumb: {
+      // 滑块颜色
+      bgc: '#333',
+      boxShadow: `inset 0 0 6px rgba(255,255,255,.6)`
+    }
+  },
+  light: {
+    track: {
+      // 轨道颜色
+      bgc: '#fefefe',
+      boxShadow: `inset 0 0 6px rgba(0,0,0,0.2)`
+    },
+    thumb: {
+      // 滑块颜色
+      bgc: '#fefefe',
+      boxShadow: `inset 0 0 6px rgba(0,0,0,0.3)`
+    }
+  }
+}
+
+```
+
+APP.vue
+
+```vue
+<script setup>
+import HelloWorld from '@/components/HelloWorld.vue'
+import { isMoboleTerminal } from '@/utils/flexible'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+const store = useStore()
+// 获取当前主题下对应的滚动条样式
+const scrollTheme = computed(() => store.getters.scrollTheme)
+</script>
+
+<template>
+  <div class="w-screen h-screen fixed top-0 left-0">
+    <router-view />
+  </div>
+</template>
+
+<style scoped>
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vue:hover {
+  filter: drop-shadow(0 0 2em #42b883aa);
+}
+</style>
+
+<style lang="scss">
+/*定义滚动条高宽及背景
+
+ 高宽分别对应横竖滚动条的尺寸*/
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 16px;
+}
+
+/*定义滚动条轨道
+ 
+  内阴影+圆角*/
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: v-bind('scrollTheme.track.boxShadow'); // 使用v-bind动态绑定样式
+  border-radius: 10px;
+  background-color: v-bind('scrollTheme.track.bgc');
+}
+
+/*定义滑块
+ 
+  内阴影+圆角*/
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: v-bind('scrollTheme.thumb.boxShadow');
+  background-color: v-bind('scrollTheme.thumb.bgc');
+}
+</style>
+
+```
+
+### 30、封装通用组件 - confirm 全局弹框 （vnode+ h函数+render函数明确）
+
+**confirm构建思路**
+
+那么想要搞明白这一点，我们就需要了解一些比较冷僻的知识点，那就是渲染函数，在渲染函数中，我们需要了解如下概念:
+
+* **虚拟dom**: 通过js来描述dom
+
+* **vnode虚拟节点**: 告诉vue页面上需要渲染什么样子的节点
+
+* **h函数:** 用来创建`vnode`的函数，接受三个参数(要渲染的 `dom`，`attrs对象`，子元素)
+
+* **render**函数:可以根据`vnode`来渲染`dom`
+
+  
+
+根据以上所说我们知道:通过`h函数`可以生成一个`vnode`，该 `vnode` 可以通过 `render`函数被渲染
+
+所**以据此我们就可以得出 `confirm` 组件的实现思路:**
+  1．创建一个`confirm `组件
+  2．创建一个`index.js`模块，在该模块中返回一个 `promise`
+
+  3.同时利用h函数生成`confirm`  `vue`的`vnode`
+  4．最后利用`render`函数，渲染`vnode`到 `body`中
+
+**首先看一下封装`confirm`的结构**
+
+![image-20220830160243841](images/image-20220830160243841.png)
+
+说明： 
+
+`confirm/index.vue`：是confirm组件
+
+`confirm/index.js`：是confirm导出的函数，通过调用函数可以触发confirm显示
+
+
+
+#### 30.1、封装`confirm`组件
+
+> 在封装之前，我们需要明确、当前要封装的组件，和我们Vue主程序的组件是不一样的；我们可以把它和主程序看做是两个不同的程序、所以它不能直接从主程序注册的组件中拿过来使用、也不能获取到主程序的app
+
+那么我们开始封装：
+
+**封装细节：**
+
+* 1、由于`confirm`是有动画的、并且将来我们要将confirm对应的`vnode`通过`render`函数挂载到真实`dom`上；所以**我们要先等组件挂载到页面上之后再控制confirm显示**; 同样，**我们要等到关闭动画执行完之后再将真实dom从页面上移除**
+
+```vue
+<template>
+  <!-- 遮罩层 -->
+  <transition name="fade">
+    <div
+      class="bg-zinc-900/80 fixed w-full h-screen left-0 top-0 z-50"
+      v-if="visible"
+      @click="onClose"
+    ></div>
+  </transition>
+  <!-- 内容 -->
+  <transition name="up">
+    <div
+      class="w-[80%] bg-white rounded p-1.5 dark:bg-slate-800 z-50 xl:w-1/3 fixed left-1/2 top-1/3 translate-x-[-50%]"
+      v-if="visible"
+    >
+      <!-- title标题 -->
+      <div class="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-1">
+        {{ title }}
+      </div>
+      <!-- content内容 -->
+      <div class="text-sm text-zinc-700 dark:text-zinc-300">
+        {{ content }}
+      </div>
+      <!-- 底部按钮 -->
+      <div class="flex justify-end items-center">
+        <Button type="default" class="mr-1" @click="onCancel">{{
+          cancelText
+        }}</Button>
+        <Button type="primary" @click="onOk">{{ okText }}</Button>
+      </div>
+    </div>
+  </transition>
+</template>
+
+<script setup>
+import Button from '../Button/index.vue'
+import { onMounted, ref } from 'vue'
+const DURATION = '0.5s' // 定义过渡时间
+const props = defineProps({
+  title: {
+    // 标题
+    type: String
+  },
+  content: {
+    // 内容
+    type: String,
+    required: true
+  },
+  cancelText: {
+    // 删除按钮文字
+    type: String,
+    default: '取消'
+  },
+  okText: {
+    // 确认按钮文字
+    type: String,
+    default: '确认'
+  },
+  onCancel: {
+    // 取消按钮事件
+    type: Function
+  },
+  onOk: {
+    // 确认按钮事件
+    type: Function
+  },
+  close: {
+    // 关闭按钮事件
+    type: Function
+  }
+})
+// confirm是否可见
+const visible = ref(false)
+// 这里onMounted的作用是，等待组件挂载到页面之后再执行就会有动画效果
+onMounted(() => {
+  visible.value = true
+})
+// 关闭事件
+const onClose = () => {
+  visible.value = false
+  // 等动画执行完之后再再调用close事件 
+  setTimeout(() => {
+    props.close?.()
+  }, Number.parseFloat(DURATION) * 1000)
+}
+// 取消事件
+const onCancel = () => {
+  props.onCancel?.()
+  onClose()
+}
+
+// 取消确认
+const onOk = () => {
+  props.onOk?.()
+  onClose()
+}
+</script>
+
+<style lang="scss" scoped>
+/* 遮罩层过渡 */
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+}
+
+/* 弹框过渡 */
+.up-enter-from,
+.up-leave-to {
+  transform: translate3d(-50%, 100px, 0);
+  opacity: 0;
+}
+.up-enter-active,
+.up-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+}
+</style>
+
+```
+
+#### 30.2、封装`confirm`组件api调用函数
+
+confirm/index.js
+
+**函数的作用**：
+
+* 1、当函数被调用时`confirm`组件展示
+* 2、函数的返回值为`promise`对象、
+  * 2.1、当用户点击取消按钮时、promise状态为`拒绝`状态
+  * 2.2、当用户点击确认按钮时、promise状态为`成功`状态
+* 3、title和content至少有一个、当title有时content没有时，把title的值赋值给content，title的值置为空
+
+**实现的一些api说明：**
+
+**h函数**：[官网](https://cn.vuejs.org/api/render-function.html#h) 根据传入的参数生成对应的`vnode` 虚拟`dom`
+
+​	我们常见的h函数的第一个参数一般都是标签名， 但是在`vue3`提供的**h函数** **第一个参数不但可以接收字符串变签名，还可以支持组件**
+
+**render函数**： 在vue3中有两种render： 第一种就是组件中的render，它返回一个vnode树； 第二种就是本次使用的render,它的作用就是将虚拟dom渲染到真实dom中
+
+```js
+import { h, render } from 'vue'
+import ConfirmComponent from './index.vue'
+
+export default (options) => {
+  return new Promise((resolve, reject) => {
+    let {
+      title,
+      content,
+      cancelText,
+      okText,
+      onCancel: onCancelFn,
+      onOk: onOkFn,
+      close: closeFn
+    } = options
+    if (!title && !content)
+      return console.error(`【confirm】 title or content must be have value!`)
+    if (title && !content) {
+      content = title
+      title = ''
+    }
+	// 处理取消回调
+    const onCancel = () => {
+      onCancelFn?.()
+      reject('cancel')
+    }
+    // 处理确认回调
+    const onOk = () => {
+      onOkFn?.()
+      resolve('confirm')
+    }
+	// 在用户点击关闭弹框后，会延时500ms执行close，目的是让动画走完
+    const close = () => {
+      closeFn?.()
+       // 此时动画已经走完、所以将组件从页面中移除
+      render(null, document.body)
+    }
+
+    // 通过h函数将Confirm组件创建成对应的虚拟dom ， 第二项传入组件的属性值
+    const vnode = h(ConfirmComponent, {
+      title,
+      content,
+      cancelText,
+      okText,
+      onCancel,
+      onOk,
+      close
+    })
+
+    // 通过render函数创虚拟dom挂载到真实dom上
+    render(vnode, document.body)
+  })
+}
+
+```
+
+#### 30.3、测试
+
+```js
+import confirm from '@/libs/confirm/index'
+const onClickDelectAll = () => {
+  confirm({
+    title: '提示',
+    content: '确认删除全部历史记录吗？',
+    cancelText: '不删了',
+    okText: '全部删掉'
+  })
+    .then((res) => {
+      store.commit('search/removeAllHistory')
+      console.log(res)
+    })
+    .catch((e) => {
+      console.log(e)
+    })
+}
+```
+
+
+
+![image-20220830172046623](images/image-20220830172046623.png)
+
+
+
+### 31:通用组件:方法触发的message构建分析
+
+在之前的时候，我们构建过一个 confirm 的通用组件，该组件我们可以直接通过方法进行调用展示
+那么对于咱们接下来打算构建的message组件，同样如此，我们依然希望可以通过方法的调用直接展示对应的组件。
+那么根据我们之前的经验，我们知道:
+1.首先我们需要先构建出一个对应的`message/index.vue`
+
+2．然后构建出对应的message/index.js模块
+3.在模块中,通过:
+
+​	`h`函数构建`vnode`
+
+​	`render`函数,进行渲染
+进行处理。
+那么以上方式，就是是咱们message的构建过程。
+
+**我们要实现的`message`的功能**
+
+* 1、要有四种状态：`success`、`warning`、`error`、`info`
+* 2、屏幕支持同时创建多个`message`，多个`message`自上而下排列
+* 3、显示和隐藏时要有自上而下的过渡动画
+* 4、当有新的`message`展示时，其他的`message`要暂停隐藏、直到空闲500ms后再隐藏
+
+
+
+**主要说明**：
+
+> 如果需要同屏显示多个message实例的话，我们需要对每一个message实例创建一个div、并将div挂载到页面上
+
+#### 31.1、实现message
+
+```vue
+<template>
+  <transition name="down">
+    <div
+      class="message-box text-base rounded-sm shadow-md cursor-pointer border overflow-hidden p-1 min-w-[380px] fixed z-50 left-1/2 top-4 translate-x-[-50%]"
+      :style="typeStyle.divStyle"
+      v-if="visible"
+    >
+      <span :style="typeStyle.spanStyle" class="leading-3">{{ message }}</span>
+    </div>
+  </transition>
+</template>
+<script>
+const TYPES_SUCCESS = 'success'
+const TYPES_ERROR = 'error'
+const TYPES_WARNING = 'warning'
+const TYPES_INFO = 'info'
+
+const TYPES_STYLE = {
+  [TYPES_SUCCESS]: {
+    divStyle: 'background-color:#f0f9eb; border-color:#e1f3d8;',
+    spanStyle: 'color:#67C23A'
+  },
+  [TYPES_ERROR]: {
+    divStyle: 'background-color:#fef0f0;border-color:#fde2e2;',
+    spanStyle: 'color:#F56C6C'
+  },
+  [TYPES_WARNING]: {
+    divStyle: 'background-color:#fdf6ec;border-color:#faecd8;',
+    spanStyle: 'color:#E6A23C'
+  },
+  [TYPES_INFO]: {
+    divStyle: 'background-color:#edf2fc;border-color:#EBEEF5;',
+    spanStyle: 'color:#909399'
+  }
+}
+const DURATION = '0.5s' // 定义过渡时间
+</script>
+
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { idMapTime, canClose } from './index'
+import { contralTimeout } from '@/utils'
+const props = defineProps({
+  type: {
+    type: String,
+    default: TYPES_INFO,
+    validator(key) {
+      const types = [TYPES_SUCCESS, TYPES_ERROR, TYPES_WARNING, TYPES_INFO]
+      if (!types.includes(key)) {
+        console.error('type must be ' + types.join('、'))
+      }
+      return true
+    }
+  },
+  message: {
+    type: String,
+    required: true
+  },
+  close: {
+    type: Function
+  },
+  duration: {
+    // 多久关闭 ms
+    type: Number,
+    default: 3000
+  },
+  id: {
+    type: Number
+  }
+})
+const visible = ref(false)
+const typeStyle = computed(() => {
+  const styles = TYPES_STYLE[props.type]
+  const top = `top: ${62 * (props.id - 1) + 16}px;`
+  styles.divStyle += top
+  return styles
+})
+const showTime = computed(() => Math.max(props.duration, 0)) // 展示时间 ms
+const { start, stop } = contralTimeout(
+  showTime.value + idMapTime.value[props.id],
+  () => {
+    visible.value = false
+  }
+)
+// 挂载之后再显示
+onMounted(() => {
+  visible.value = true
+  // showTime ms后关闭显示，此时开始执行关闭动画 DURATION 时间后动画执行完毕、开始调用close函数
+  // setTimeout(() => {
+  //   visible.value = false
+  // }, showTime.value + idMapTime.value[props.id])
+})
+
+watch(visible, (v) => {
+  if (!v) {
+    // 此时开始执行关闭动画 DURATION 时间后动画执行完毕、开始调用close函数
+    // props.close?.(props.id)
+    setTimeout(() => {
+      delete idMapTime.value[props.id]
+      props.close?.()
+    }, Number.parseFloat(DURATION) * 1000)
+  }
+})
+
+// 当可以关闭之后再进行开始定时器、当不可关闭后关闭定时器
+watch(canClose, (v) => {
+  if (v) {
+    start()
+  } else {
+    stop()
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.down-enter-from,
+.down-leave-to {
+  transform: translate3d(-50%, -2.5rem, 0);
+  opacity: 0;
+}
+.down-enter-active,
+.down-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+}
+</style>
+```
+
+
+
+message/index.js
+
+```js
+import { h, render, ref } from 'vue'
+import messageComponent from './index.vue'
+let count = 0
+let timer = null
+export const canClose = ref(false)
+export const idMapTime = ref({})
+export default class Message {
+  static init(props) {
+    clearTimeout(timer)
+    canClose.value = false
+    timer = setTimeout(() => {
+      canClose.value = true
+    }, 500)
+    ++count
+    idMapTime.value[count] = count * 150
+    const el = document.createElement('div')
+    document.body.appendChild(el)
+    // 当关闭动画执行完成之后调用此函数，此函数卸载dom
+    const onClose = (id) => {
+      props.onClose?.()
+      render(null, el)
+      document.body.removeChild(el)
+      --count
+    }
+    // 将messageComponent转化成虚拟dom数
+    const vnode = h(messageComponent, { ...props, close: onClose, id: count })
+    // 利用render函数，将虚拟dom树挂载到body上
+    render(vnode, el)
+  }
+  /**
+   * message:
+   *
+   */
+  static success(message, onClose) {
+    Message.init({ message, onClose, type: 'success' })
+  }
+  static warning(message, onClose) {
+    Message.init({ message, onClose, type: 'warning' })
+  }
+  static error(message, onClose) {
+    Message.init({ message, onClose, type: 'error' })
+  }
+  static info(message, onClose) {
+    Message.init({ message, onClose, type: 'info' })
+  }
+}
+
+```
+
+
+
+utils/index/js
+
+```js
+/**
+ * 可控定时器
+ * @param {*} time
+ * @param {*} cb
+ * @returns
+ */
+export const contralTimeout = (time, cb) => {
+  // 是否正在启动
+  const isStart = ref(false)
+  const isFinish = ref(false)
+  let relTime = 0
+  let timer = setInterval(() => {
+    if (isStart.value) {
+      relTime += 5
+    }
+    if (relTime >= time) {
+      clearInterval(timer)
+      isFinish.value = true
+      cb && cb()
+    }
+  }, 5)
+  const stop = () => {
+    isStart.value = false
+  }
+  const start = () => {
+    isStart.value = true
+  }
+
+  return {
+    stop,
+    start,
+    isStart,
+    isFinish
+  }
+}
+
+```
+
+#### 31.2、测试效果
+
+```js
+import Message from '@/libs/message/index'
+const show = () => {
+  Message.success('下载成功')
+}
+```
+
+![20220831_142332](images/20220831_142332.gif)
+
+
+
+### 32、使用`file-saver`实现文件下载
+
+当我们点击item中的下载按钮时，我们期望可以下载当前的图片。
+那么想要实现该功能,则需要使用到专门的下载包。
+目前常用的支持下载功能包有两个:
+1．小文件下载:[file-saver](https://github.com/eligrey/FileSaver.js)
+2.大文件下载: [streamsaver](https://github.com/jimmywarting/StreamSaver.js)
+
+咱们的图片下载属于小文件的下载，所以我们可以直接使用file-saver
+
+* 1．安装file-saver :
+
+  ```powershell
+  $ npm i --save file-saver@2.0.5
+  ```
+
+* 2.在 src/views/main/components/list/item.vue中，增加下载功能:
+
+  ```js
+  import { saveAs } from 'file-saver'
+  import Message from '@/libs/message/index'
+  
+  const handleDownload = (pexel) => {
+    Message.success('下载成功')
+    setTimeout(() => {
+      saveAs(pexel.photoDownLink)
+    }, 100)
+  }
+  ```
+  
+  
+  
+  
+
+### 33、实现全屏展示功能
+
+我们知道在原生`dom`上，提供了一些方法来供我们开启或关闭全屏：
+
+* [`Element.requestFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/requestFullScreen)
+* [`Document.exitFullscreen()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/exitFullscreen)
+* [`Document.fullscreen`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreen)
+* [`Document.fullscreenElement`](https://developer.mozilla.org/zh-CN/docs/Web/API/Document/fullscreenElement)
+
+#### 一般浏览器
+
+使用`requestFullscreen()`和`exitFullscreen()`来实现
+
+#### 早期版本Chrome浏览器
+
+基于WebKit内核的浏览器需要添加`webkit`前缀，使用`webkitRequestFullScreen()`和`webkitCancelFullScreen()`来实现。
+
+#### 早期版本IE浏览器
+
+基于Trident内核的浏览器需要添加`ms`前缀，使用`msRequestFullscreen()`和`msExitFullscreen()`来实现，注意方法里的screen的s为小写形式。
+
+#### 早期版本火狐浏览器
+
+基于Gecko内核的浏览器需要添加`moz`前缀，使用`mozRequestFullScreen()`和`mozCancelFullScreen()`来实现。
+
+#### 早期版本Opera浏览器
+
+Opera浏览器需要添加`o`前缀，使用`oRequestFullScreen()`和`oCancelFullScreen()`来实现。
+
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萌狼蓝天 伴姬一生</title>
+</head>
+
+<body>
+    <div>
+        <img src="./source/img/dog.jpg" height="300" alt="">
+        <button id="full">全屏显示</button>
+        <button id="cancelFull">取消全屏</button>
+        <button id="isFull">是否全屏</button>
+        <p id="tip" style="color:blue"></p>
+    </div>
+    <script>
+        //全屏显示
+        var div = document.querySelector('div');
+        document.querySelector('#full').onclick = function () {
+            if (div.requestFullscreen) {
+                div.requestFullscreen(); // 正常浏览器 
+            } else if (div.webkitRequestFullScreen) {
+                div.webkitRequestFullScreen(); // webkit 
+            } else if (div.mozRequestFullScreen) {
+                div.mozRequestFullScreen(); //早期火狐浏览器
+            } else if (div.oRequestFullScreen) {
+                div.oRequestFullScreen(); //早期Opera浏览器
+            } else if (div.msRequestFullscreen) {
+                div.msRequestFullscreen(); //早期IE浏览器
+            } else {
+                alert('暂不支持在您的浏览器中全屏');
+            }
+        };
+        //取消全屏显示
+        document.querySelector('#cancelFull').onclick = function () {
+            if (document.exitFullscreen) {
+                document.exitFullscreen(); // 正常浏览器 
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen(); // webkit 
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen(); //早期火狐浏览器
+            } else if (document.oCancelFullScreen) {
+                document.oCancelFullScreen(); //早期Opera浏览器
+            } else if (document.msCancelFullscreen) {
+                document.msCancelFullscreen(); //早期IE浏览器
+            } else {
+                alert('暂不支持在您的浏览器中全屏');
+            }
+            //可以用document，也可以用上方设置的变量 div
+        };
+        //检测当前是否处于全屏状态
+        document.querySelector('#isFull').onclick = function () {
+            // alert(document.webkitIsFullScreen); // webkit
+            // 使用上面的弹窗方式。如果是处于全屏状态，会自动退出
+            document.getElementById('tip').innerHTML=document.webkitIsFullScreen;
+        };
+    
+    </script>
+</body>
+
+</html>
+```
 
 
 
 
 
+但是这些方法：在一些低版本浏览器中存在兼容性的问题，需要我们手动封装；如果不想封装的话也可以使用第三方封装好的库来处理：
+
+**常见的第三方全屏库：**
+
+* 1、`vueUse`
+
+```js
+import { useFullscreen } from '@vueuse/core'
+
+const imgEle = ref(null)
+const { isFullscreen, enter, exit, toggle } = useFullscreen(imgEle)
+const handleFullScreen = () => {
+  imgEle.value.style.backgroundColor = 'transparent'
+  enter()
+}
+```
+
+### 34、从首页跳转到详情页解决方案
+
+#### 34.1、需求分析
+
+首先我们看一下首页的图片
+
+![image-20220902162832479](images/image-20220902162832479.png)
+
+**分析：**
+
+* 当点击某一个图片时、跳转到对应图片的详情页
+* 并且在跳转的过程中有从小到放大的动画的效果（类似于全屏效果的动画）
+
+#### 34.2、分析现阶段路由跳转动画
+
+在[vue-router](https://router.vuejs.org/zh/guide/advanced/transitions.html)页面跳转如果要实现跳转到动画，需要借助于[transition](https://cn.vuejs.org/guide/built-ins/transition.html#the-transition-component)组件来进行实现动画
+
+```vue
+<router-view v-slot="{ Component, route }">
+  <transition name="fade">
+    <component :is="Component" />
+  </transition>
+</router-view>
+```
+
+![image-20220902164012102](images/image-20220902164012102.png)
 
 
+
+这是在vue官网截的图，从图中我们可以得知transition组件一般适用于 组件 或 元素的显示和隐藏、并不适合我们的需求、
+
+#### 34.3、提出解决方案
+
+那么根据咱们上一小节的分析，我们知道通过 `vue-router` 的过渡动效是无法实现咱们期望的路由切换效果的。
+
+**那么我们应该如何去做呢?**
+
+想要搞明白咱们的可行性方案，**那么首先我们得先来搞清楚什么是路由的跳转?**
+
+所谓路由的跳转无非指的是两个部分:
+
+* 1．浏览器的url 发生了变化
+
+* 2．浏览器中展示的页面组件发生了变化
+
+  
+
+那么只要满足这两点,我们就认为路径进行了跳转
+
+**所以说，我们是不是可以换个思路，我们不去进行真实的路由跳转，而是先修改浏览器的URL，再切换展示的页面(以组件的形式覆盖整个浏览器可视区域)。这样对于用户而言，是不是就完成了整个的路由跳转工作。**
+
+
+
+所以说我们的具体问题就变成了:
+
+* 1.如何让浏览器的url发生变化,但是不跳转页面
+* 2.如何让一个新的组件以包含动画的形式进行展示
+  * 那么想要完成第一个功能我们可以使用:`History.pushState()`方法
+  * 而第二个功能我们可以使用 `GSAP`这个动画库来进行实现。
+
+
+
+#### 34.4、关于GSAP介绍
+
+[GSAP](https://github.com/greensock/GSAP), 它是一个非常强大的js动画库, 他支持`Flip`、滚动动画等；在其内部给我们提供了非常多的方法供我们来使用；
+
+本次我们使用到的`api`，只有`set`和`to`两个：
+
+* `set`: 给元素设置初始化（动画执行之前）的属性
+
+* `to`: 给元素设置结束时（动画之后结束）的属性
+
+  * to方法的返回值为`tween`对象、我们通过调用对应的api来控制元素动画的开启、暂停、翻转、重新开始...
+
+    ```js
+    tween.play()
+    tween.pause()
+    tween.resume()
+    tween.reverse()
+    tween.restart()
+    ```
+
+    
+
+    
+
+
+
+**测试1** - 自动执行动画
+
+```vue
+<template>
+    <div  class="w-screen h-[400px] flex items-center justify-center">
+      <div ref="testGsap" class="border border-zinc-300 rounded-sm p-4">test GSAP</div>
+    </div>
+</template>
+
+<script setup>
+import gsap from "gsap"
+import { onMounted, ref } from 'vue'
+const testGsap = ref(null)
+onMounted(() => {
+  gsap.set(testGsap.value, { transform: 'translateX(-100px)', color: 'blue' })
+  gsap.to(testGsap.value, { transform: 'translateX(100px)', color: 'pink', duration: 1, delay: 0 })
+})
+</script>
+```
+
+![20220902_180847](images/20220902_180847.gif)
+
+**测试2** - 手动控制执行动画
+
+```vue
+<template>
+    <div  class="w-screen h-[400px] flex items-center justify-center">
+      <div ref="testGsap" class="border border-zinc-300 rounded-sm p-4">test GSAP</div>
+    </div>
+    <Button @click="handleStart">执行动画</Button>
+    <Button @click="handleReverse">翻转动画</Button>
+</template>
+
+<script setup>
+import gsap from "gsap"
+import { onMounted, ref } from 'vue'
+const testGsap = ref(null)
+let tween
+onMounted(() => {
+  gsap.set(testGsap.value, { transform: 'translateX(-100px)', color: 'blue' })
+  tween = gsap.to(testGsap.value, { transform: 'translateX(100px)', color: 'pink', duration: 1, delay: 0 })
+  tween.pause();
+})
+const handleStart = () => {
+   tween.play()
+}
+const handleReverse = () => {
+   tween.reverse()
+}
+</script>
+```
+
+> 也就是当我们不主动暂停的话， `gsap.to`函数调用之后就会开始执行动画
+
+
+
+#### 34.5、实现从首页调到详情页
+
+* 1、创建pins/components/pins.vue组件
+
+  ![image-20220903100744179](images/image-20220903100744179.png)
+
+* 2、在首页中使用`Pins`组件，并使用`translation`包裹、并设置执行动画
+
+  ```vue
+  <transition
+      :css="false"
+      @before-enter="onBeforeEnter"
+      @enter="onEnter"
+      @after-enter="onAfterEnter"
+      @leave="onLeave"
+      @after-leave="onAfterLeave"
+    >
+      <Pins :id="currentItem.id" v-if="pinsVisible"/>
+    </transition>
+  
+  ```
+
+* 3、点击每一项时，计算当前项距离屏幕左边和边的距离、并利用h5的`pushState`改变地址栏路径
+
+* 4、展示`Pins组件`， 在展示过程中在过渡钩子函数中设置对应的动画样式
+
+* 5、当需要关闭Pins组件时； 我们需要监听页面的回退事件`popState`，当时间被调用时关闭Pins组件
+
+**先看下我们要实现的效果**
+
+![20220903_102106](images/20220903_102106.gif)
+
+**开始实现**
+
+list/index.js
+
+```vue
+<template>
+  <div class="w-full">
+    ...
+  <!-- 图片详情 -->
+  <transition
+    :css="false"
+    @before-enter="onBeforeEnter"
+    @enter="onEnter"
+    @after-enter="onAfterEnter"
+    @leave="onLeave"
+    @after-leave="onAfterLeave"
+  >
+    <Pins :id="currentItem.id" v-if="pinsVisible"/>
+  </transition>
+</template>
+
+<script setup>
+import ListItem from './item/index.vue'
+import { getPexels } from '@/api/pexels'
+import { isMoboleTerminal } from '@/utils/flexible'
+import { ref, watch, computed } from 'vue'
+import { useStore } from 'vuex'
+import Pins from '@/views/pins/components/pins.vue'
+import gsap from 'gsap'
+import { useEventListener } from '@vueuse/core'
+
+const store = useStore()
+
+// 选中item
+const selectItem = (item) => {
+  currentItem.value = item
+  // 修改页面地址
+  window.history.pushState(null, '', '/pins/' + item.id)
+}
+// 监听页面回退
+useEventListener('popstate', () => {
+  delete currentItem.value.id
+})
+const pinsVisible = computed(() => currentItem.value.id !== void 0)
+// pins动画钩子 -- 动画执行之前
+const onBeforeEnter = (el) => {
+  gsap.set(el, {
+    scaleX: 0.2,
+    scaleY: 0.2,
+    transformOrigin: '0 0',
+    translateX: currentItem.value.translateX,
+    translateY: currentItem.value.translateY,
+    opacity: 0
+  })
+}
+
+// pins动画钩子 -- 动画执行过程
+const onEnter = (el, done) => {
+  el.__gsap__ = gsap.to(el, {
+    duration: 0.4,
+    scaleX: 1,
+    scaleY: 1,
+    transformOrigin: '0 0',
+    translateX: 0,
+    translateY: 0,
+    opacity: 1,
+    onComplete: done
+  })
+}
+
+// pins动画钩子 -- 动画离开过程
+const onLeave = (el, done) => {
+  el.__gsap__.reverse()
+  setTimeout(() => {
+    done()
+  }, el.__gsap__._dur * 1500)
+}
+
+const onAfterLeave = (el) => {
+  currentItem.value = {}
+}
+</script>
+```
+
+item.vue
+
+```js
+const handleSelectItem = () => {
+  // 获取图片中间路基浏览器左边和顶部的距离
+  const { left, top, width, height }  = imgEle.value?.getBoundingClientRect()
+  const translateX = left + width / 2
+  const translateY = top + height / 2
+  emits('selectItem', {
+    ...props.pexel,
+    translateX,
+    translateY
+  })
+}
+```
+
+#### 34.5、解决刷新丢失的问题 - 路由props传参
+
+所谓的刷新丢失，就是刷新之后、会直接访问我们设置的路径、而路径没有没有匹配到对应的路由组件、所以就会显示空白页面；
+
+**所以，我们的思路是：**
+
+**方案1：**
+
+* 1、在路由表中配置对应连接的路由对象
+* 2、路由对象中的组件中使用到我们上面定义的pins.vue组件
+* 3、这样刷新时就会通过路由匹配到对应的路由组件，在路由初始化时获取`id`参数传递给组件
+
+**方案2：路由props传参**
+
+[vue-router 中 props传参给组件](https://router.vuejs.org/zh/guide/essentials/passing-props.html)、
+
+在你的组件中使用 `$route` 会与路由紧密耦合，这限制了组件的灵活性，因为它只能用于特定的 URL。虽然这不一定是件坏事，但我们可以通过 `props` 配置来解除这种行为：
+
+我们可以将下面的代码
+
+```js
+const User = {
+  template: '<div>User {{ $route.params.id }}</div>'
+}
+const routes = [{ path: '/user/:id', component: User }]
+```
+
+替换成
+
+```js
+const User = {
+  // 请确保添加一个与路由参数完全相同的 prop 名
+  props: ['id'],
+  template: '<div>User {{ id }}</div>'
+}
+const routes = [{ path: '/user/:id', component: User, props: true }]
+```
+
+这允许你在任何地方使用该组件，使得该组件更容易重用和测试。
+
+
+
+本案例中我们使用**路由props传参**
+
+```js
+export default [
+  {
+    path: '/',
+    name: 'pc首页',
+    component: () => import('@/views/layout/index.vue'),
+    children: [
+      {
+        path: '',
+        name: 'main',
+        component: () => import('@/views/main/index.vue')
+      },
+       // 这里使用路由props传参
+      {
+        path: '/pins/:id',
+        name: 'pins-id',
+        props: true, // props设置为true
+        component: () => import('@/views/pins/components/pins.vue') 
+      }
+    ]
+  }
+]
+
+```
+
+### 35、登录/注册表单校验
+
+在以往我们开发项目是，都是借助于第三方组件库俩实现登录注册的表单；
+
+当然校验也是他们提供的
+
+
+
+而在当前项目中，由于我们的风格与第三方库的风格互斥、没有采用第三方库；
+
+如果我们想要进行表单校验的话，那就需要下面两种方案中选择了：
+
+* 自己手动封装表单校验
+* 使用第三方表单校验库
+
+由于、时间比较紧、并且自己封装的表单校验可能复用性不是那么好，所以、我们采用**使用第三方表单校验库**
+
+**使用第三方表单校验库优点：**
+
+* 包比较小、一般这种包只做一种功能
+* 适用性比较强
+
+本项目中采用的第三方表单校验库： [vee-validate](https://vee-validate.logaretm.com/v4/tutorials/dynamic-form-generator/)
+
+#### 35.1、使用vee-validate进行表单校验
+
+首先安装`vee-validate`依赖包
+
+```powershell
+$ yarn add vee-validate
+```
+
+然后对我们写的项目进行改造
+
+```vue
+ 	<form class="w-full mt-4">
+        <input
+          placeholder="用户名"
+          type="text"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 dark:text-zinc-300 border-zinc-300 font-bold duration-500 text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 mb-3 focus:border-red-600"
+        />
+        <input
+          placeholder="密码"
+          type="password"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 dark:text-zinc-300 border-zinc-300 font-bold text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 mb-3 focus:border-red-600"
+        />
+        <Button
+          class="bg-red-600 mt-4 border-red-600 w-full hover:bg-red-600 focus:bg-red-600 hover:border-red-700 focus:border-red-700 active:border-red-700 duration-300 dark:bg-zinc-900 dark:border-zinc-900 xl:dark:bg-zinc-800 xl:dark:border-zinc-800 py-1"
+          >登录</Button
+        >
+      </form>
+```
+
+改造为
+
+```vue
+    <vee-form class="w-full mt-4 text-[0px]"  @submit="onSubmit">
+        <vee-filed
+          name="name"
+          :rules="validateName"
+          placeholder="用户名"
+          type="text"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 dark:text-zinc-300 border-zinc-300 font-bold duration-500 text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 focus:border-red-600"
+        />
+        <vee-error-message
+          name="name"
+          class="text-sm text-red-600 mt-0.5 block"
+        />
+        <vee-filed
+          name="password"
+          :rules="validatePassword"
+          placeholder="密码"
+          type="password"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 mt-3 dark:text-zinc-300 border-zinc-300 font-bold text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 focus:border-red-600"
+        />
+        <vee-error-message
+          name="password"
+          class="text-sm text-red-600 mt-0.5 block"
+        />
+        <Button
+          class="bg-red-600 mt-4 border-red-600 w-full hover:bg-red-600 focus:bg-red-600 hover:border-red-700 focus:border-red-700 active:border-red-700 duration-300 dark:bg-zinc-900 dark:border-zinc-900 xl:dark:bg-zinc-800 xl:dark:border-zinc-800 py-1"
+          >登录</Button
+        >
+      </vee-form>
+
+<script setup>
+import {
+  Form as VeeForm,
+  Field as VeeFiled,
+  ErrorMessage as VeeErrorMessage
+} from 'vee-validate'
+import { validateName, validatePassword } from '../validate'
+
+const onSubmit = (v) => {
+  console.log('v', v)
+}
+</script>
+```
+
+
+
+validate.js 校验函数
+
+```js
+/**
+ * 校验姓名, 校验成功返回true, 校验失败返回字符串、vee-validate会将字符串显示出来
+ * @param {*} value
+ */
+export const validateName = (value) => {
+  if (value === void 0 || value.length <= 0) return '用户名不能为空'
+  if (value.length < 3 || value.length > 12) return '用户名只能为3-12位'
+  return true
+}
+
+/**
+ * 校验密码
+ * @param {*} value
+ * @returns
+ */
+export const validatePassword = (value) => {
+  if (value === void 0 || value.length <= 0) return '密码不能为空'
+  if (value.length < 6 || value.length > 12) return '密码只能为6-12位'
+  return true
+}
+```
+
+![image-20220905092900887](images/image-20220905092900887.png)
+
+如果输入的内容校验不通过会有错误的提示
+
+### 36、人类行为认证
+
+#### 36.1、什么是人类行为认证？
+
+在我们日常开发过程中人类行为认真已经无处不在了，它只要的作用就是过滤出非人类的一些操作的
+
+![image-20220905095446717](images/image-20220905095446717.png)
+
+![image-20220905095457426](images/image-20220905095457426.png)
+
+
+
+![image-20220905095545633](images/image-20220905095545633.png)
+
+![image-20220905095603731](images/image-20220905095603731.png)
+
+#### 36.2、目的是什么？
+
+那么为什么需要有这样的一个东西呢?这样的一个东西对用户而言是非常讨厌的一个操作。
+想要搞明白这个问题，那么大家就需要先搞清楚现在的应用面临的一个问题。
+
+假如在一个博客系统中，它会根据博客的访问量进行首页排名，那么假设有一个人，写了一段脚本代码，构建出巨量的`IP`来不断地访问一个指定的博客，那么这个博客就会被顶到非常靠前的访问位置中。
+
+又比如:在某些投票，或者砍价的应用中，如果也有人利用一段脚本代码，伪造出巨量的用户来去进行投票或者砍价的行为，那么这样的投票或者砍价是不是也就失去了原本的意义
+
+那么以上这种场景我们应该如何进行防止呢?如何能够判断出，当前进行”投票“的操作是人进行的，而不是机器进行的呢?
+那么想要解决这个问题,就需要使用到人类行为验证了。
+
+**简单来说，人类行为验证的目的就是:明确当前的操作是人完成的，而非机器。**
+
+
+
+#### 36.3、原理是什么？
+
+人机验证通过对用户的行为数据、设备特征与网络数据构建多维度数据分析，采用完整的可信前端安全方案保证数据采集的真实性、有效性。比如以下方面(但不仅仅限于)︰
+
+(1〉浏览器特征检查︰所有浏览器都有差异，可以通过各种前端相关手段检查浏览器环境的真实性。
+(2)鼠标事件(click、move、hover、leave... . . .)
+(3)页面窗口(size、scroll、坐标......)
+(4) cookie，等等。
+
+
+
+**滑动验证码实现原理是什么？** 
+
+滑动验证码是服务端随机生成滑块和带有滑块阴影的背景图片，然后将其随机的滑块位置坐标保存。前端实现互动的交互，将滑块把图拼上，获取用户的相关行为值。然后服务端进行相应值的校验。其背后的逻辑是使用机器学习中的深度学习，根据鼠标滑动轨迹，坐标位置，计算拖动速度，重试次数等多维度来判断是否人为操作。 
+
+滑动验证码对机器的判断，不只是完成拼图，前端用户看不见的是——验证码后台针对用户产生的行为轨迹数据进行机器学习建模，结合访问频率、地理位置、历史记录等多个维度信息，快速、准确的返回人机判定结果，故而机器识别+模拟不易通过。滑动验证码也不是万无一失，但对滑动行为的模拟需要比较强的破解能力，毕竟还是大幅提升了攻击成本，而且技术也会在攻防转换中不断进步。  
+
+#### 36.4、目前实现的方案有哪些？
+
+分为两种： 一种是收费的、另一种是开源的
+
+**收费的代表有**：
+
+* 1、[网易网盾](https://dun.163.com/)
+* 2、[数美](https://www.ishumei.com/new/product/tw/code?utm_medium=%E6%97%B6%E4%BB%A31-%E9%AA%8C%E8%AF%81%E7%A0%81&utm_campaign=%E9%AA%8C%E8%AF%81%E7%A0%81%E8%AF%8D&utm_content=%E4%BA%BA%E6%9C%BA%E9%AA%8C%E8%AF%81&utm_term=%7Bpa_mt_id%7D&utm_source=bdss1&e_matchtype=2&e_creative=53625341357&e_adposition=cl1&e_pagenum=1&e_keywordid=394337781220&e_keywordid2=376336362893&sdclkid=AL2N15F_15qR15Az&bd_vid=7116999343080641981)
+* 3、[极验](http://www.geetest.com/)
+* ...
+
+
+
+**开源的有**：
+
+* [slideCaptcha](https://gitee.com/LongbowEnterprise/SliderCaptcha?_from=gitee_search)
+
+在项目中我们使用开源的`slideCaptcha`作为人类行为校验
+
+
+
+#### 36.5、开始实现
+
+首先在项目中引入两个文件（这两个文件是根据业务多级经过修改的、如果您使用当前插件的话、建议您使用官方包）
+
+![image-20220905115118323](images/image-20220905115118323.png)
+
+**封装人类行为认证组件**
+
+```vue
+<template>
+  <div
+    class="w-[360px] border text-sm border-zinc-300 rounded-sm bg-white p-1 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 duration-300 fixed z-50 left-1/2 top-1/3 translate-x-[-50%] translate-y-[-50%]"
+  >
+    <div class="h-4 flex items-center text-sm">
+      <span class="flex-grow">请完成安全验证</span>
+      <div @click="onRefresh">
+        <svg-icon
+          name="refresh"
+          class="w-2 h-2 rounded-sm fill-zinc-600 dark:fill-zinc-300 duration-300 cursor-pointer"
+        ></svg-icon>
+      </div>
+
+      <div class="ml-2" @click="onClose">
+        <svg-icon
+          name="close"
+          class="w-2 h-2 rounded-sm fill-zinc-600 dark:fill-zinc-300 duration-300 cursor-pointer"
+        ></svg-icon>
+      </div>
+    </div>
+    <div id="captcha" class="h-[195px]"></div>
+  </div>
+</template>
+
+<script>
+const EMITS_SUCCESS = 'success'
+const EMITS_CLOSE = 'close'
+</script>
+
+<script setup>
+import '@/vendor/SliderCaptcha/longbow.slidercaptcha.min.js'
+import '@/vendor/SliderCaptcha/slidercaptcha.min.css'
+import { onMounted } from 'vue'
+const emits = defineEmits([EMITS_SUCCESS, EMITS_CLOSE])
+let sc = null
+onMounted(() => {
+  sc = sliderCaptcha({
+    id: 'captcha',
+    loadingText: '正在加载中...',
+    failedText: '再试一次',
+    barText: '向右滑动填充拼图',
+    repeatIcon: 'fa fa-redo',
+    onSuccess: function (arr) {
+      console.log('成功')
+      emits(EMITS_SUCCESS, arr)
+    },
+    onFail: function () {
+      console.log('失敗')
+    },
+    verify: function () {
+      return true
+    }
+  })
+})
+
+// 点击刷新按钮
+const onRefresh = () => {
+  console.log('刷新')
+  sc?.reset()
+}
+// 点击关闭按钮
+const onClose = () => {
+  console.log('关闭')
+  emits(EMITS_CLOSE)
+}
+</script>
+
+<style></style>
+
+```
+
+**使用组件**
+
+```vue
+<template>
+  <div
+    class="w-screen h-screen xl:bg-zinc-200 dark:bg-zinc-800 duration-500 bg-white"
+  >
+    <!-- pc端头部 -->
+    <div class="py-4 justify-center hidden xl:flex">
+      <img src="https://res.lgdsunday.club/signlogo.png" alt="" />
+    </div>
+    <!-- 移动端头部 -->
+    <div class="flex justify-center h-[111px] relative xl:hidden">
+      <!-- 背景图 -->
+      <img
+        src="https://res.lgdsunday.club/login-bg.png"
+        class="w-full h-full object-fill dark:hidden"
+        alt=""
+      />
+      <!-- 前景图 -->
+      <img
+        class="absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-4 h-4"
+        src="https://m.imooc.com/static/wap/static/common/img/logo-small@2x.png"
+        alt=""
+      />
+    </div>
+
+    <!-- login 核心区域 -->
+
+    <div
+      class="xl:w-[380px] w-full bg-white dark:bg-zinc-800 xl:dark:bg-zinc-900 duration-500 mt-4 xl:shadow-sm px-3 py-3 xl:rounded-sm mx-auto"
+    >
+      <!-- 账号登录 -->
+      <div
+        class="text-red-600 font-semibold text-center dark:text-zinc-500 hidden xl:block text-sm"
+      >
+        账号登录
+      </div>
+      <!-- 登录表单 -->
+      <vee-form class="w-full mt-4 text-[0px]" @submit="onSubmit">
+        <vee-filed
+          v-model="inputValues.name"
+          name="name"
+          :rules="validateName"
+          placeholder="用户名"
+          type="text"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 dark:text-zinc-300 border-zinc-300 font-bold duration-500 text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 focus:border-red-600"
+        />
+        <vee-error-message
+          name="name"
+          class="text-sm text-red-600 mt-0.5 block"
+        />
+        <vee-filed
+          v-model="inputValues.password"
+          name="password"
+          :rules="validatePassword"
+          placeholder="密码"
+          type="password"
+          class="border-b block w-full bg-transparent dark:border-zinc-500 mt-3 dark:text-zinc-300 border-zinc-300 font-bold text-zinc-600 placeholder:text-zinc-400 outline-0 text-sm px-1 pb-1 focus:border-red-600"
+        />
+        <vee-error-message
+          name="password"
+          class="text-sm text-red-600 mt-0.5 block"
+        />
+        <Button
+          class="bg-red-600 mt-4 border-red-600 w-full hover:bg-red-600 focus:bg-red-600 hover:border-red-700 focus:border-red-700 active:border-red-700 duration-300 dark:bg-zinc-900 dark:border-zinc-900 xl:dark:bg-zinc-800 xl:dark:border-zinc-800 py-1"
+          >登录</Button
+        >
+      </vee-form>
+
+      <div class="mt-10">
+        <div class="flex justify-around">
+          <svg-icon
+            class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
+            name="qq"
+          ></svg-icon>
+
+          <svg-icon
+            class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
+            name="wexin"
+          ></svg-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入人类行为认证组件 -->
+  <transition name="up">
+    <slider-captcha-vue
+      v-if="sliderCaptchaVisible"
+      @success="onSuccess"
+      @close="onClose"
+    />
+  </transition>
+</template>
+
+<script setup>
+import {
+  Form as VeeForm,
+  Field as VeeFiled,
+  ErrorMessage as VeeErrorMessage
+} from 'vee-validate'
+import { validateName, validatePassword } from '../validate'
+import SliderCaptchaVue from '../components/slider-captcha/index.vue'
+import { ref } from 'vue'
+import { getCaptcha } from '@/api/sys'
+const inputValues = ref({})
+// 人类行为认证组件是否展示
+const sliderCaptchaVisible = ref(false)
+
+const onSubmit = (v) => {
+  sliderCaptchaVisible.value = true
+}
+
+const onSuccess = (arr) => {
+  // 向后台发送请求验证人类行为认证
+  const flag = await getCaptcha({
+    behavior: arr
+  })
+
+  if (!flag) return false
+  // 在这里发送登录请求
+  console.log(arr, inputValues.value, flag)
+}
+const onClose = () => {
+  sliderCaptchaVisible.value = false
+}
+</script>
+
+<style lang="scss" scoped>
+.up-enter-from,
+.up-leave-to {
+  transform: translateY(50px);
+  opacity: 0;
+}
+.up-enter-active,
+.up-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+</style>
+
+```
+
+![image-20220905142847856](images/image-20220905142847856.png)
+
+完成之后的效果如上
+
+### 37、通用组件 v-input组件
+
+#### 37.1、需求分析
+
+随着项目中表单使用越来越多、而每次都要写表单都会比较麻烦，所以我决定封装一个表单组件`v-input`
+
+**封装的组件具有以下功能**
+
+* 1、通过`v-model`绑定数据
+* 2、通过设置`inputType`属性值来展示不同的组件
+  * 2.1、属性值为`input`时： 展示`input`组件 (默认)
+  * 2.2、属性值为`textarea`时，展示`textarea`组件
+* 3、支持设置`max`属性值，来限定输出内容的最大长度
+* 4、支持原生的属性直接透传到`input`或`textarea`组件上
+
+![image-20220906141919521](images/image-20220906141919521.png)
+
+上面时我们实现的组件
+
+#### 37.2、开始实现
+
+**核心知识点**：
+
+* `const attrs = useAttrs()` 获取到组件上的属性、然后对属性进行过滤生成新的属性、将属性通过 `v-bind`绑定到组件上
+
+```vue
+<template>
+  <div class="relative inline-flex" v-if="isInput">
+    <input
+      v-bind="fmtAttrs"
+      :value="modelValue"
+      @input="handleInput"
+      type="text"
+      class="appearance-none border outline-none border-zinc-200 dark:border-zinc-500 bg-white dark:bg-zinc-800 rounded-sm text-sm text-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:border-red-500 dark:focus:border-zinc-300 px-1 py-1 duration-300"
+    />
+    <div
+      v-if="isHasMax"
+      class="absolute right-1 top-1/2 translate-y-[-50%] text-xs text-zinc-400 dark:text-zinc-600"
+    >
+      <span :class="{ 'text-red-500': vLength === Number(max) }">
+        {{ vLength }}/{{ max }}
+      </span>
+    </div>
+  </div>
+
+  <!-- textarea -->
+  <div class="relative inline-flex" v-else>
+    <textarea
+      rows="5"
+      v-bind="fmtAttrs"
+      :value="modelValue"
+      @input="handleInput"
+      type="text"
+      class="appearance-none border outline-none border-zinc-200 dark:border-zinc-500 bg-white dark:bg-zinc-800 rounded-sm text-sm text-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:border-red-500 dark:focus:border-zinc-300 px-1 py-1 duration-300"
+    />
+    <div
+      v-if="isHasMax"
+      class="absolute right-1 bottom-0 translate-y-[-20%] text-xs text-zinc-400 dark:text-zinc-600"
+    >
+      <span :class="{ 'text-red-500': vLength === Number(max) }">
+        {{ vLength }}/{{ max }}
+      </span>
+    </div>
+  </div>
+</template>
+<script>
+const INPUT_TYPE_INPUT = 'input'
+const INPUT_TYPE_TEXTAREA = 'textarea'
+</script>
+
+<script setup>
+import { computed, useAttrs, watch } from 'vue'
+const attrs = useAttrs()
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true
+  },
+  inputType: {
+    // 输入框的内容
+    type: String,
+    default: INPUT_TYPE_INPUT,
+    validator(v) {
+      const arr = [INPUT_TYPE_INPUT, INPUT_TYPE_TEXTAREA]
+      if (!arr.includes(v)) {
+        throw new TypeError(
+          `Input component inputType must be ${arr.join('、')}`
+        )
+      }
+      return true
+    }
+  },
+  max: {
+    // 最大输入的字数
+    type: [String, Number]
+  }
+})
+const emits = defineEmits(['update:modelValue'])
+// 将props的竖向过滤掉
+const fmtAttrs = computed(() => {
+  const { inputType, max, ...attrMap } = attrs
+  return attrMap
+})
+// 是否显示input
+const isInput = computed(() => props.inputType === INPUT_TYPE_INPUT)
+
+const vLength = computed(() => (props.modelValue ? props.modelValue.length : 0))
+// 是否存在最大值
+const isHasMax = computed(() => {
+  const v = Number.parseInt(props.max)
+  return !Number.isNaN(v)
+})
+const handleInput = ($event) => {
+  emits('update:modelValue', $event.target.value)
+}
+
+watch(
+  () => props.modelValue,
+  (v) => {
+    console.log('v', v)
+    if (isHasMax.value && v !== void 0) {
+      if (v.length > props.max) {
+        emits('update:modelValue', v.substr(0, props.max))
+      }
+    }
+  },
+  {
+    immediate: true
+  }
+)
+</script>
+
+<style></style>
+
+```
+
+#### 37.3、测试封装的组件
+
+```vue
+			<v-input
+              v-model="inputValues.username"
+              placeholder="用户名"
+              max="20"
+              class="flex-grow"
+            />
+```
+
+![image-20220906141919521](images/image-20220906141919521.png)
+
+```vue
+			<v-input
+              v-model="inputValues.username"
+              placeholder="个人介绍"
+              class="flex-grow"
+              inputType="textarea"
+            />
+```
+
+![image-20220906142546414](images/image-20220906142546414.png)
+
+
+
+### 38、通用组件 - Dialog
+
+#### 38.1、分析Dialog
+
+
+对于`Dialog` 通用组件而言，我们可以参考`confirm` 的组件的构建过程。|
+它们两个构建方案非常类似,唯二不同的地方是:
+
+1. `Dialog`无需通过方法调用的形式展示
+2. `Dialog` 的内容区可以渲染任意的内容
+2. `Dialog`的确定按钮支持loading提示、并且当`onOk`返回的值为`promise`时，且`promise`的状态变为`成功状态时`才会关闭`Dialog`
+
+排除这两点之后,其余与confirm完全相同。
+
+#### 38.2、实现Dialog
+
+```vue
+<template>
+  <!-- 遮罩层 -->
+  <transition name="fade">
+    <div
+      class="bg-zinc-900/80 fixed w-full h-screen left-0 top-0 z-50"
+      v-if="modelValue"
+      @click="onClose"
+    ></div>
+  </transition>
+  <!-- 内容 -->
+  <transition name="up">
+    <div
+      class="max-w-[80%] min-w-[256px] bg-white rounded p-1.5 dark:bg-zinc-800 z-50 fixed left-1/2 top-1/3 translate-x-[-50%]"
+      v-if="modelValue"
+    >
+      <!-- title标题 -->
+      <div class="text-sm font-bold text-zinc-800 dark:text-zinc-200 mb-1">
+        {{ title }}
+      </div>
+      <!-- content内容 -->
+      <div class="text-sm text-zinc-700 dark:text-zinc-300">
+        <slot />
+      </div>
+      <!-- 底部按钮 -->
+      <div class="flex justify-end items-center">
+        <Button type="default" class="mr-1" @click="onCancel">{{
+          cancelText
+        }}</Button>
+        <Button type="primary" @click="onOk" :loading="loading">{{
+          okText
+        }}</Button>
+      </div>
+    </div>
+  </transition>
+</template>
+
+<script setup>
+import Button from '../Button/index.vue'
+import { onMounted, ref } from 'vue'
+
+const DURATION = '0.5s' // 定义过渡时间
+const props = defineProps({
+  modelValue: {
+    // 控制开关
+    type: Boolean,
+    required: true
+  },
+  title: {
+    // 标题
+    type: String
+  },
+  cancelText: {
+    // 删除按钮文字
+    type: String,
+    default: '取消'
+  },
+  okText: {
+    // 确认按钮文字
+    type: String,
+    default: '确认'
+  },
+  onCancel: {
+    // 取消按钮事件
+    type: Function
+  },
+  onOk: {
+    // 确认按钮事件
+    type: Function
+  },
+  close: {
+    // 关闭按钮事件
+    type: Function
+  }
+})
+const emits = defineEmits(['update:modelValue'])
+// 关闭事件
+const onClose = () => {
+  emits('update:modelValue', false)
+}
+const loading = ref(false)
+// 取消事件
+const onCancel = () => {
+  props.onCancel?.()
+  onClose()
+}
+
+// 取消确认
+const onOk = () => {
+  if (!props.onOk) {
+    onClose()
+    return false
+  }
+  const result = props.onOk()
+  // 判断 result 是不是promise对象？ 如果是则`promise`的状态变为`成功状态时`才会关闭`Dialog`，如果不是则直接关闭
+  if (result && result.then && typeof result.then === 'function') {
+    loading.value = true
+    result
+      .then(() => {
+        onClose()
+      })
+      .finally(() => {
+        loading.value = false
+      })
+  } else {
+    onClose()
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+/* 遮罩层过渡 */
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+}
+
+/* 弹框过渡 */
+.up-enter-from,
+.up-leave-to {
+  transform: translate3d(-50%, 100px, 0);
+  opacity: 0;
+}
+.up-enter-active,
+.up-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+}
+</style>
+
+```
+
+
+
+#### 38.3、测试Dialog
+
+```vue
+<Dialog v-model="dialogVisible" :onOk="onOk">
+    <div>123</div>
+  </Dialog>
+<script setup>
+import { ref } from 'vue'
+const dialogVisible = ref(true)
+
+const onOk = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, 2000)
+  })
+}
+</script>
+```
+
+![20220906_160011](images/20220906_160011.gif)
+
+
+
+```vue
+<Dialog v-model="dialogVisible" :onOk="onOk">
+    <div>123</div>
+  </Dialog>
+<script setup>
+import { ref } from 'vue'
+const dialogVisible = ref(true)
+
+const onOk = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(reject, 2000)
+  })
+}
+</script>
+```
+
+![20220906_155904](images/20220906_155904.gif)
+
+
+
+```vue
+<Dialog v-model="dialogVisible" :onOk="onOk">
+    <div>123</div>
+  </Dialog>
+<script setup>
+import { ref } from 'vue'
+const dialogVisible = ref(true)
+
+const onOk = () => {
+
+}
+</script>
+```
+
+![20220906_160104](images/20220906_160104-16624525367382.gif)
+
+
+
+### 39、裁剪头像图片
+
+#### 39.1、技术分析
+
+#### 39.2、URL.createObjectURL() 和 new FileReader()在读取预览文件时区别
+
+`URL.createObjectURL()` [MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL) 静态方法会创建一个 `DOMString`，其中包含一个表示参数中给出的对象的URL。这个 URL 的生命周期和创建它的窗口中的 `document` 绑定。这个新的`URL` 对象表示指定的 `File` 对象或 `Blob` 对象。
+
+`URL.createObjectURL(blob)`和`FileReader.readAsDataURL(file)`很相似
+
+##### 39.2.1、主要区别
+
+* 通过`FileReader.readAsDataURL(file)`可以获取一段`data:base64`的字符串
+* 通过`URL.createObjectURL(blob)`可以获取当前文件的一个内存URL 如：`blob:http://localhost:5173/8c36c7ff-7be3-4dbb-a8c4-e87317d21c4b`
+
+##### 39.2.2、执行时机：
+
+* `createObjectURL`**是同步执行（立即的）**
+
+* `FileReader.readAsDataURL**是异步执行（过一段时间）**
+
+##### 39.2.3、内存使用：
+
+ `createObjectURL`返回一段带`hash`的`url`，并且一直存储在内存中，直到`document`触发了`unload`事件（例如：`document close`）或者执行`revokeObjectURL`来释放。
+  `FileReader.readAsDataURL`则返回包含很多字符的`base64`，并会比`blob url`消耗更多内存，但是在不用的时候会自动从内存中清除（通过垃圾回收机制）
+  **兼容性方面两个属性都兼容ie10以上的浏览器。**
+
+##### 39.2.3、优劣对比：
+
+使用`createObjectURL`可以节省性能并更快速，只不过需要在不使用的情况下手动释放内存
+如果不太在意设备性能问题，并想获取图片的`base64`，则推荐使用`FileReader.readAsDataURL`
+
+
+
+##### 39.2.4、使用方式：
+
+```js
+objectURL = URL.createObjectURL(blob);
+```
+
+**示例**
+
+html 文件
+
+```html
+<input type="file" id="btn" accept="image/*" value="点击上传" />
+<img id="img"/>
+```
+
+js文件
+
+```js
+btn.addEventListener('change',function(){
+	let file = this.files[0];
+	// 进一步防止文件类型错误
+	if(!/image\/\w+/.test(file.type)){  
+        alert("看清楚，这个需要图片！");  
+        return false;  
+    }  
+	img.src = URL.createObjectURL(file)
+})
+```
+
+#### 39.3、使用cropperjs依赖包来裁剪图片
+
+[cropperjs](https://github.com/fengyuanchen/cropperjs)是一个非常强大的图片裁剪工具，它可以适用于：
+
+* 原生js
+* vue
+* react
+* 等 ...
+
+而且操作也非常简单、只需要简单几步即可完成图片的裁剪工作：
+
+在我们项目中，首先
+
+**安装依赖**
+
+```powershell
+$ npm install cropperjs
+```
+
+**初始化实例**
+
+```js
+const cropper = new Cropper(element[, options])
+```
+
+**获取裁剪的图片数据**
+
+```js
+cropper.getCroppedCanvas().toBlob(blob => {
+    console.log(blob)
+    // Blob { size: 8975, type: 'image/png' }
+    console.log(URL.createObjectURL(blob))
+    // blob:http://localhost:5173/fd101aff-90ec-4e56-a5a0-846e69b67577
+})
+```
+
+#### 39.4、完整代码
+
+**注意：**
+
+因为我们的项目在移动端和pc端的裁剪是不同的，所以我们需要分别对移动端和pc端的裁剪进行配置
+
+**移动端配置：**
+
+```js
+const pcConfig = {
+  aspectRatio: 1 // 保持纵横比为1:1
+}
+```
+
+**pc端配置**
+
+```js
+const mobileConfig = {
+  aspectRatio: 1, // 保持纵横比为1:1
+  viewMode: 1, // 将裁剪框限定在画布大小
+  dragMode: 'move', // 移动画布、裁剪框不动
+  cropBoxMovable: false, // 裁剪框不可移动
+  cropBoxResizable: false // 不可调整裁剪框大小
+}
+```
+
+
+
+**完整代码**
+
+```vue
+<template>
+  <div
+    class="w-screen h-screen xl:w-auto xl:h-auto overflow-auto relative dark:bg-zinc-800 duration-300"
+  >
+    <div class="p-1 absolute right-0 top-0 xl:hidden">
+      <svg-icon
+        name="close"
+        class="w-2 h-2 fill-zinc-600 dark:fill-zinc-400"
+        @click="handleClose"
+      ></svg-icon>
+    </div>
+    <div
+      class="xl:w-[500px] xl:h-[300px] w-[80%] aspect-auto mx-auto mt-4 xl:mt-auto flex items-center justify-center"
+    >
+      <img :src="imgUrl" ref="image" alt="" class="w-full h-full" />
+    </div>
+    <div class="flex justify-center">
+      <Button class="w-2/3 mt-2" @click="handleClick">确定</Button>
+    </div>
+  </div>
+</template>
+
+<script>
+const pcConfig = {
+  aspectRatio: 1 // 保持纵横比为1:1
+}
+const mobileConfig = {
+  aspectRatio: 1, // 保持纵横比为1:1
+  viewMode: 1, // 将裁剪框限定在画布大小
+  dragMode: 'move', // 移动画布、裁剪框不动
+  cropBoxMovable: false, // 裁剪框不可移动
+  cropBoxResizable: false // 不可调整裁剪框大小
+}
+</script>
+<script setup>
+import Cropper from 'cropperjs'
+import 'cropperjs/dist/cropper.css'
+import { onMounted, ref } from 'vue'
+import { isMoboleTerminal } from '@/utils/flexible'
+let cropper = null
+defineProps({
+  imgUrl: {
+    // 图片地址
+    type: String,
+    required: true
+  }
+})
+const emits = defineEmits(['onConfirm', 'close'])
+const image = ref(null)
+
+onMounted(() => {
+  cropper = new Cropper(
+    image.value,
+    isMoboleTerminal.value ? mobileConfig : pcConfig
+  )
+})
+
+const handleClick = () => {
+  emits('onConfirm')
+  cropper.getCroppedCanvas().toBlob((blob) => {
+    console.log(blob)
+    // Blob { size: 8975, type: 'image/png' }
+    console.log(URL.createObjectURL(blob))
+    // blob:http://localhost:5173/fd101aff-90ec-4e56-a5a0-846e69b67577
+  })
+}
+const handleClose = () => {
+  emits('close')
+}
+</script>
+
+<style></style>
+
+```
+
+移动端效果如下：
+
+![image-20220907092525211](images/image-20220907092525211.png)
+
+pc端效果如下：
+
+![image-20220907092615713](images/image-20220907092615713.png)
+
+### 40、数据存储方案 - 腾讯cos和阿里oss
+
+#### 40.1、腾讯云cos存储对象
+
+前端想要上传、修改cos存储桶中的对象、常见的有两种方式：
+
+* 1、以后台实现对存储桶的操作、前台传输给后台、后台再进行操作
+
+* 2、前端从后台获取到操作存储桶的加密信息之后、直接操作存储桶
+
+  注意：由于签名计算放在前端会暴露 `SecretId` 和 `SecretKey`，我们把签名计算过程放在后端实现，前端通过 `ajax` 向后端获取签名结果，正式部署时请在后端加一层自己网站本身的权限检验。
+
+方案二方式：
+
+1、安装[`cos-js-sdk-v5`](https://github.com/tencentyun/cos-js-sdk-v5)依赖 [腾讯云sdk官网](https://cloud.tencent.com/document/product/436/11459)
+
+```powershell
+npm i cos-js-sdk-v5 --save
+```
+
+2、使用
+
+> 不推荐 （秘钥是写死的，不安全）
+
+```js
+var COS = require('cos-js-sdk-v5');
+
+// SECRETID 和 SECRETKEY请登录 https://console.cloud.tencent.com/cam/capi 进行查看和管理
+var cos = new COS({
+    SecretId: 'SECRETID',
+    SecretKey: 'SECRETKEY',
+});
+```
+
+
+
+> 推荐 （秘钥是动态获取的，相对比较安全）
+
+```js
+var COS = require('cos-js-sdk-v5');
+var cos = new COS({
+    // getAuthorization 必选参数
+    getAuthorization: function (options, callback) {
+        // 异步获取临时密钥
+        // 服务端 JS 和 PHP 例子：https://github.com/tencentyun/cos-js-sdk-v5/blob/master/server/
+        // 服务端其他语言参考 COS STS SDK ：https://github.com/tencentyun/qcloud-cos-sts-sdk
+        // STS 详细文档指引看：https://cloud.tencent.com/document/product/436/14048
+
+        var url = 'http://example.com/server/sts.php'; // url替换成您自己的后端服务
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function (e) {
+            try {
+                var data = JSON.parse(e.target.responseText);
+                var credentials = data.credentials;
+            } catch (e) {
+            }
+            if (!data || !credentials) {
+              return console.error('credentials invalid:\n' + JSON.stringify(data, null, 2))
+            };
+            callback({
+              TmpSecretId: credentials.tmpSecretId,
+              TmpSecretKey: credentials.tmpSecretKey,
+              SecurityToken: credentials.sessionToken,
+              // 建议返回服务器时间作为签名的开始时间，避免用户浏览器本地时间偏差过大导致签名错误
+              StartTime: data.startTime, // 时间戳，单位秒，如：1580000000
+              ExpiredTime: data.expiredTime, // 时间戳，单位秒，如：1580000000
+          });
+        };
+        xhr.send();
+    }
+});
+```
+
+3、上传、删除、查询、下载资源
+
+> 上传
+
+```js
+cos.putObject({
+    Bucket: 'examplebucket-1250000000', /* 必须 */
+    Region: 'COS_REGION',     /* 存储桶所在地域，必须字段 */
+    Key: 'exampleobject',              /* 必须 */
+    StorageClass: 'STANDARD',
+    Body: fileObject, // 上传文件对象
+    onProgress: function(progressData) {
+        console.log(JSON.stringify(progressData));
+    }
+}, function(err, data) {
+    console.log(err || data);
+});
+```
+
+> 查询对象列表
+
+```js
+cos.getBucket({
+    Bucket: 'examplebucket-1250000000', /* 必须 */
+    Region: 'COS_REGION',     /* 存储桶所在地域，必须字段 */
+    Prefix: 'a/',           /* 非必须 */
+}, function(err, data) {
+    console.log(err || data.Contents);
+});
+```
+
+> 下载
+
+```js
+cos.getObject({
+    Bucket: 'examplebucket-1250000000', /* 必须 */
+    Region: 'COS_REGION',     /* 存储桶所在地域，必须字段 */
+    Key: 'exampleobject',              /* 必须 */
+}, function(err, data) {
+    console.log(err || data.Body);
+});
+```
+
+> 删除
+
+```js
+cos.deleteObject({
+    Bucket: 'examplebucket-1250000000', /* 必须 */
+    Region: 'COS_REGION',     /* 存储桶所在地域，必须字段 */
+    Key: 'exampleobject'        /* 必须 */
+}, function(err, data) {
+    console.log(err || data);
+});
+```
+
+#### 40.2、阿里云oss存储
+
+用法和上面的腾讯云的COS存储类似，
+
+本次方案、采用的是在客户端安装、提供的sdk、调用对应的api来操作存储对象
+
+1、[`安装sdk`](https://help.aliyun.com/document_detail/64041.htm?spm=a2c4g.11186623.0.0.235d24cbqRW0xl#concept-64041-zh) 
+
+```powershell
+npm install ali-oss
+```
+
+2、创建oss实例
+
+```js
+const OSS = require('ali-oss');
+
+const client = new OSS({
+    // yourRegion填写Bucket所在地域。以华东1（杭州）为例，Region填写为oss-cn-hangzhou。
+    region: 'yourRegion',
+    // 从STS服务获取的临时访问密钥（AccessKey ID和AccessKey Secret）。
+    accessKeyId: 'yourAccessKeyId',
+    accessKeySecret: 'yourAccessKeySecret',
+    // 从STS服务获取的安全令牌（SecurityToken）。
+    stsToken: 'yourSecurityToken',
+    refreshSTSToken: async () => {
+    // 向您搭建的STS服务获取临时访问凭证。
+      const info = await fetch('your_sts_server');
+      return {
+        accessKeyId: info.accessKeyId,
+        accessKeySecret: info.accessKeySecret,
+        stsToken: info.stsToken
+      }
+    },
+    // 刷新临时访问凭证的时间间隔，单位为毫秒。
+    refreshSTSTokenInterval: 300000,
+    // 填写Bucket名称。
+    bucket: 'examplebucket'
+});
+```
+
+3、操作对象
+
+> 上传
+
+```js
+client.put(
+    "exampledir/exampleobject.txt",
+    data
+    //{headers}
+);
+```
+
+> 下载
+
+```js
+// 填写Object完整路径。Object完整路径中不能包含Bucket名称。
+const url = client.signatureUrl('exampleobject.txt', { response });
+console.log(url);
+```
+
+> 删除
+
+```js
+let result = await client.delete('exampledir/exampleobject.txt');
+      console.log(result);
+```
+
+#### 40.3、在项目中利用工具上传至阿里云oss
+
+```js
+const handleClick = () => {
+  emits('onConfirm')
+  cropper.getCroppedCanvas().toBlob((blob) => {
+    console.log(blob)
+    const typeArr = blob.type.split('/')
+    const filename = `${store.getters.userInfo.username}/${Date.now()}.${
+      typeArr[typeArr.length - 1]
+    }`
+    // 上传
+    handleUpload(filename, blob)
+  })
+}
+// 获取实例
+const getOSSClient = async () => {
+  const { Credentials } = await getSts()
+  return new OSS({
+    // yourRegion填写Bucket所在地域。以华东1（杭州）为例，yourRegion填写为oss-cn-hangzhou。
+    region: REGION,
+    // 从STS服务获取的临时访问密钥（AccessKey ID和AccessKey Secret）。
+    accessKeyId: Credentials.AccessKeyId,
+    accessKeySecret: Credentials.AccessKeySecret,
+    // 从STS服务获取的安全令牌（SecurityToken）。
+    stsToken: Credentials.SecurityToken,
+    // 填写Bucket名称。
+    bucket: BUCKET,
+    // 刷新token
+    refreshSTSToken: async () => {
+      const { Credentials } = await getSts()
+      return {
+        accessKeyId: Credentials.AccessKeyId,
+        accessKeySecret: Credentials.AccessKeySecret,
+        // 从STS服务获取的安全令牌（SecurityToken）。
+        stsToken: Credentials.SecurityToken
+      }
+    },
+    // 刷新Token间隔时间
+    refreshSTSTokenInterval: 5 * 1000
+  })
+}
+// 上传图片到阿里oss
+const handleUpload = async (filename, file) => {
+  try {
+    // 填写Object完整路径。Object完整路径中不能包含Bucket名称。
+    // 您可以通过自定义文件名（例如exampleobject.txt）或文件完整路径（例如exampledir/exampleobject.txt）的形式实现将数据上传到当前Bucket或Bucket中的指定目录。
+    // data对象可以自定义为file对象、Blob数据或者OSS Buffer。
+    const oss = await getOSSClient()
+    const result = await oss.put(`images/${filename}`, file)
+    console.log(result.url)
+    handleChangeAvatar(result.url)
+  } catch (e) {
+    console.log(e)
+    Message.error('异常错误')
+  }
+}
+// 更新地址到本地和数据库中
+const handleChangeAvatar = async (avatar) => {
+  try {
+    // 更新到bending
+    store.commit('user/setUserInfo', {
+      ...store.getters.userInfo,
+      avatar
+    })
+    // 更新到远程数据库中
+    await putUser(store.getters.userInfo)
+    Message.success('头像修改成功')
+  } catch (error) {
+    Message.error(error.message)
+  }
+}
+```
+
+### 41、登录鉴权 - beforeEach钩子函数
+
+完成了这么多功能、但是我们还没有把登录鉴权给实现、这小结我们要把登录鉴权给完成
+
+在`vue2.x`版本、`vue-router`使用的版本为`3.x`
+
+但是
+
+在在`vue3.x`版本、`vue-router`使用的版本为`4.x`
+
+在`vue-router` `4.x`中一些钩子和api发生了改变、包括这一小节我们需要使用到的：**全局前置守卫beforeEach**
+
+> 在vue-router `4.x`中`beforeEach`所接收的回调函数中 第三个参数`next`不是必须的；而使用 **函数返回 不同的值 来代替next的作用**
+
+**返回值及作用：**
+
+* `false`: 取消当前的导航。如果浏览器的 URL 改变了(可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 `from` 路由对应的地址。
+* `undefined` / `true` : **则导航是有效的**，并调用下一个导航守卫
+* `{ name: 'Login' }` : 表示重定向到`Login`页面
+* `'/login'`: 表示重定向到`/login`
+
+
+
+#### 41.1、登录鉴权 - 实现权限认证
+
+**实现方案**：
+
+* 1、我们在路由表中找到需要授权认证之后才能访问的路由、在其路由的meta属性中定义`user`属性为`true`
+
+* 2、使用路由全局守卫在跳转之前进行判断
+
+  * 2.1、跳转的路由`user`属性是否为`true`
+
+    * `true`:
+
+      判断用户是否已登录？ 允许跳转 ： 重定向到 '/'
+
+    * `false` 
+
+      允许跳转
+
+
+
+
+
+**路由表中数据**：
+
+```js
+[
+    ...
+    {
+        path: '/pins/:id',
+        name: 'pins-id',
+        props: true,
+        component: () => import('@/views/pins/components/pins.vue')
+      },
+      {
+        path: '/profile',
+        name: 'profile',
+        component: () => import('@/views/profile/index.vue'),
+        meta: {
+          user: true // + 代表需要用户先登录之后才能访问
+        }
+      }
+]
+```
+
+**在premission.js中进行认证**
+
+```js
+// 用户权限控制
+import router from '@/router'
+import store from '@/store'
+
+router.beforeEach((to, from) => {
+  // 访问的路由不需要用户登录时直接跳转到指定路由
+  if (!to.meta.user) {
+    return true // 允许跳转
+  }
+
+  // 用户是否已登录
+  if (Object.keys(store.getters.userInfo).length > 0) {
+    return true // 允许跳转
+  }
+
+  return '/' // 重定向到首页
+})
+
+```
+
+在`main.js`引入认证
+
+```js
+import { createApp } from 'vue'
+import '@/styles/index.scss'
+import App from '@/App.vue'
+import router from '@/router'
+import store from '@/store'
+import { useREM } from '@/utils/flexible'
+import { useTheme } from '@/utils/theme'
+import libs from '@/libs'
+import directives from '@/directives'
+import 'virtual:svg-icons-register'
+import './premission' // + 引入认证文件
+```
+
+### 42、通用组件 - `trigger-menu`
+
+它被分成了两个组件: trigger-menu和 trigger-menu-item
+其中 `trigger-menu`表示整个的功能区域, `trigger-menu-item`表示其中的每一项。
+所以我们的分析需要针对于这两个组件分别进行分析:
+
+1. `trigger-menu`:对于它而言，只起到一个包裹容器的作用，所以我们只需要提供一个对应的插槽即可
+
+2. `trigger-menu-item`:起到了对应的展示作用，展示包括了`icon`和文字。所以内部应该存在`svg-icon`用来展示图片，存在一个插槽用来展示文字。
+
+  
+
+  那么到这里我们就基本分析完成了这两个组件的基本构建方案，整体还是比较简单的。
+
+**trigger-menu组件**
+
+```vue
+<template>
+  <div
+    class="flex items-center justify-between py-1 px-3 rounded-full bg-white dark:bg-zinc-800 duration-300"
+    v-bind="$attrs"
+  >
+    <slot />
+  </div>
+</template>
+
+<script setup></script>
+
+<style></style>
+```
+
+**trigger-menu-item组件**
+
+```vue
+<template>
+  <div class="flex flex-col justify-center items-center" @click="handleClick">
+    <svg-icon
+      :name="icon"
+      v-if="icon"
+      class="fill-zinc-700 dark:text-zinc-600 duration-300 w-2 h-2 mb-0.5"
+      :class="iconClass"
+    ></svg-icon>
+    <p
+      class="text-center text-sm text-zinc-800 dark:text-zinc-500 duration-300"
+      :class="textClass"
+    >
+      <slot />
+    </p>
+  </div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+
+const props = defineProps({
+  icon: {
+    type: String
+  },
+  iconClass: {
+    type: String
+  },
+  textClass: {
+    type: String
+  },
+  to: {
+    type: [String, Object]
+  }
+})
+const router = useRouter()
+const handleClick = () => {
+  if (!props.to) return
+  router.push(props.to)
+}
+</script>
+```
