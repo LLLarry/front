@@ -61,7 +61,7 @@ const props = defineProps({
 })
 const tipRoot = ref(null)
 const tipPosition = ref({})
-const { rootPosition, popoverRoot } = useRootPosition()
+const { rootPosition, popoverRoot, reGet } = useRootPosition()
 const tipVisible = useTrigger(popoverRoot, tipRoot, props.trigger)
 
 const tipStyle = computed(() => {
@@ -120,6 +120,7 @@ watch(
   (v) => {
     if (v) {
       nextTick(() => {
+        reGet()
         const { width, height } = tipRoot.value.getBoundingClientRect()
         tipPosition.value = { width, height }
       })

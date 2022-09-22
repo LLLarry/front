@@ -1,7 +1,7 @@
 <template>
   <div class="h-main dark:bg-zinc-800 duration-500">
     <router-view />
-    <Button type="primary" plain>搜索</Button>
+    <!-- <Button type="primary" plain>搜索</Button>
     <Button type="warning" plain>搜索</Button>
     <Button type="danger" plain>搜索</Button>
     <Button type="success" plain>搜索</Button>
@@ -21,7 +21,7 @@
     <popover trigger="click"> click </popover>
     <popover trigger="focus"> focus </popover>
     <popover trigger="manual"> manual </popover>
-    <div style="height: 2000vh; width: 2000vh"></div>
+    <div style="height: 2000vh; width: 2000vh"></div> -->
   </div>
 </template>
 

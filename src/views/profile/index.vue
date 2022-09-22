@@ -1,9 +1,11 @@
 <template>
   <div class="w-full h-full bg-zinc-200 xl:p-2 overflow-auto dark:bg-zinc-800">
+    <navbar v-if="isMoboleTerminal"> 个人资料 </navbar>
     <div
       class="bg-white xl:max-w-sm mx-auto p-2 xl:rounded dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 duration-300 text-sm"
     >
       <h1
+        v-if="!isMoboleTerminal"
         class="text-base text-zinc-900 dark:text-zinc-200 font-bold mb-3 text-center"
       >
         个人资料
@@ -117,27 +119,33 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <Dialog
-    v-if="!isMoboleTerminal"
-    v-model="dialogVisible"
-    :onOk="onOk"
-    title="裁减图片"
-  >
-    <change-avatar :imgUrl="blobImg" @onConfirm="dialogVisible = false" />
-    <template #footer>
-      <div></div>
-    </template>
-  </Dialog>
-  <popup v-else v-model="dialogVisible">
-    <change-avatar
-      :imgUrl="blobImg"
-      @onConfirm="dialogVisible = false"
-      @close="dialogVisible = false"
-    />
-  </popup>
+    <Dialog
+      v-if="!isMoboleTerminal"
+      v-model="dialogVisible"
+      :onOk="onOk"
+      title="裁减图片"
+    >
+      <change-avatar :imgUrl="blobImg" @onConfirm="dialogVisible = false" />
+      <template #footer>
+        <div></div>
+      </template>
+    </Dialog>
+    <popup v-else v-model="dialogVisible">
+      <change-avatar
+        :imgUrl="blobImg"
+        @onConfirm="dialogVisible = false"
+        @close="dialogVisible = false"
+      />
+    </popup>
+  </div>
 </template>
+
+<script>
+export default {
+  name: 'profile'
+}
+</script>
 
 <script setup>
 import { ref, watch } from 'vue'

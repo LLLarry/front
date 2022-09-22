@@ -23,7 +23,6 @@
     :css="false"
     @before-enter="onBeforeEnter"
     @enter="onEnter"
-    @after-enter="onAfterEnter"
     @leave="onLeave"
     @after-leave="onAfterLeave"
   >

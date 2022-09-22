@@ -21,9 +21,13 @@ function useRootPosition() {
     window.removeEventListener('scroll', scrollFn)
     window.removeEventListener('resize', scrollFn)
   })
+  const reGet = () => {
+    scrollFn()
+  }
   return {
     rootPosition,
-    popoverRoot
+    popoverRoot,
+    reGet
   }
 }
 

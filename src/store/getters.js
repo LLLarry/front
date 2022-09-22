@@ -1,4 +1,5 @@
-import { DEFAULT_SCROLL_THEME } from '@/constants'
+import { DEFAULT_SCROLL_THEME, ROUTER_TYPE_NONE } from '@/constants'
+import { isMoboleTerminal } from '@/utils/flexible'
 export default {
   categorys(state) {
     return state.categorys.categorys
@@ -25,13 +26,21 @@ export default {
   searchText(state) {
     return state.app.searchText
   },
-  token (state) {
+  token(state) {
     return state.user.token
   },
-  userInfo (state) {
+  userInfo(state) {
     return state.user.userInfo
   },
-  isLogin (state) {
+  isLogin(state) {
     return Object.keys(state.user.userInfo).length !== 0
+  },
+  routerType(state) {
+    // 如果是pc端，则直接返回none
+    if (!isMoboleTerminal.value) {
+      return ROUTER_TYPE_NONE
+    }
+    // 手机端，返回app中存储的routerType
+    return state.app.routerType
   }
 }

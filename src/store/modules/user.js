@@ -2,7 +2,8 @@ import { getToken, getProfile, registerUser } from '@/api/sys'
 import md5 from 'md5'
 import Message from '@/libs/message'
 import router from '@/router'
-import { LOGIN_TYPE_USERNAME } from '@/constants'
+import { LOGIN_TYPE_USERNAME, OAUTH_LOGIN_NO_REGISTER_CODE } from '@/constants'
+
 export default {
   namespaced: true,
   state() {
@@ -35,10 +36,15 @@ export default {
     async handleLogin(context, payload) {
       try {
         // 登录、获取token 当有password时，进行md5加密
-        const { token } = await getToken({
+
+        const { token, code } = await getToken({
           ...payload,
           password: payload.password ? md5(payload.password) : ''
         })
+        // code 204表示未注册
+        if (code === OAUTH_LOGIN_NO_REGISTER_CODE) {
+          return code
+        }
         // 存储token
         context.commit('setToken', token)
         // 获取用户信息

@@ -89,3 +89,14 @@ export const LOGIN_TYPE_WX = 'wx'
 // 阿里oss配置
 export const REGION = 'oss-cn-beijing'
 export const BUCKET = 'imooc-front'
+
+// 路由跳转动画类型
+// 不执行
+export const ROUTER_TYPE_NONE = 'none'
+// 前进类型
+export const ROUTER_TYPE_PUSH = 'push'
+// 回退类型
+export const ROUTER_TYPE_BACK = 'back'
+
+// 登录未注册的状态码
+export const OAUTH_LOGIN_NO_REGISTER_CODE = 204

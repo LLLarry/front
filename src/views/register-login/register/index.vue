@@ -60,7 +60,7 @@
           class="text-sm text-red-600 mt-0.5 block"
         />
 
-         <vee-filed
+        <vee-filed
           v-model="inputValues.confirmPassword"
           name="confirmPassword"
           rules="validateComfirmPassword:@password"
@@ -73,8 +73,13 @@
           class="text-sm text-red-600 mt-0.5 block"
         />
 
-        <div class=" text-right">
-          <router-link to="/login" tag="a"  class=" hover:text-red-600 select-none no-underline text-zinc-500 dark:text-zinc-400 duration-500 cursor-pointer text-xs mt-3 inline-block">去登录</router-link>
+        <div class="text-right">
+          <router-link
+            to="/login"
+            tag="a"
+            class="hover:text-red-600 select-none no-underline text-zinc-500 dark:text-zinc-400 duration-500 cursor-pointer text-xs mt-3 inline-block"
+            >去登录</router-link
+          >
         </div>
         <Button
           class="bg-red-600 mt-4 border-red-600 w-full hover:bg-red-600 focus:bg-red-600 hover:border-red-700 focus:border-red-700 active:border-red-700 duration-300 dark:bg-zinc-900 dark:border-zinc-900 xl:dark:bg-zinc-800 xl:dark:border-zinc-800 py-1"
@@ -82,20 +87,24 @@
           >立即注册</Button
         >
       </vee-form>
-
     </div>
-  </div>
 
-  <!-- 引入人类行为认证组件 -->
-  <transition name="up">
-    <slider-captcha-vue
-      v-if="sliderCaptchaVisible"
-      @success="onSuccess"
-      @close="onClose"
-    />
-  </transition>
+    <!-- 引入人类行为认证组件 -->
+    <transition name="up">
+      <slider-captcha-vue
+        v-if="sliderCaptchaVisible"
+        @success="onSuccess"
+        @close="onClose"
+      />
+    </transition>
+  </div>
 </template>
 
+<script>
+export default {
+  name: 'login'
+}
+</script>
 <script setup>
 import {
   Form as VeeForm,
@@ -103,14 +112,19 @@ import {
   ErrorMessage as VeeErrorMessage,
   defineRule
 } from 'vee-validate'
-import { validateName, validatePassword, validateComfirmPassword } from '../validate'
+import {
+  validateName,
+  validatePassword,
+  validateComfirmPassword
+} from '../validate'
 import SliderCaptchaVue from '../components/slider-captcha/index.vue'
 import { getCaptcha } from '@/api/sys'
 import { ref } from 'vue'
 import { useStore } from 'vuex'
-
+import { useRoute } from 'vue-router'
 
 const store = useStore()
+const route = useRoute()
 const inputValues = ref({})
 const loading = ref(false)
 // 人类行为认证组件是否展示
@@ -134,7 +148,10 @@ const onSuccess = async (arr) => {
     if (!flag) return false
     const { confirmPassword, ...v } = inputValues.value
     // 在这里发送登录请求
-    await store.dispatch('user/handleRegister', v)
+    await store.dispatch('user/handleRegister', {
+      ...v,
+      ...route.query
+    })
   } finally {
     loading.value = false
   }

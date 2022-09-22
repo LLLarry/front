@@ -77,10 +77,11 @@
 
       <div class="mt-10">
         <div class="flex justify-around">
-          <svg-icon
+          <!-- <svg-icon
             class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
             name="qq"
-          ></svg-icon>
+          ></svg-icon> -->
+          <QQLogin />
 
           <svg-icon
             class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
@@ -89,22 +90,23 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- 引入人类行为认证组件 -->
-  <transition name="up">
-    <slider-captcha-vue
-      v-if="sliderCaptchaVisible"
-      @success="onSuccess"
-      @close="onClose"
-    />
-  </transition>
-
-  <div>
-    <h1>input</h1>
+    <!-- 引入人类行为认证组件 -->
+    <transition name="up">
+      <slider-captcha-vue
+        v-if="sliderCaptchaVisible"
+        @success="onSuccess"
+        @close="onClose"
+      />
+    </transition>
   </div>
 </template>
 
+<script>
+export default {
+  name: 'login'
+}
+</script>
 <script setup>
 import {
   Form as VeeForm,
@@ -117,6 +119,7 @@ import { getCaptcha } from '@/api/sys'
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { LOGIN_TYPE_USERNAME } from '@/constants'
+import QQLogin from '../components/qq-login/index.vue'
 
 const store = useStore()
 const inputValues = ref({})

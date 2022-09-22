@@ -78,7 +78,7 @@ const menus = [
   }
 ]
 
-const handleClickMenu = ({ id }) => {
+const handleClickMenu = ({ id, path }) => {
   if (id === 2) {
     // 退出登录
     confirm({
@@ -86,9 +86,8 @@ const handleClickMenu = ({ id }) => {
     }).then(() => {
       store.dispatch('user/handleLogout')
     })
-  } else if (id === 0) {
-    // 个人信息
-    router.push('/profile')
+  } else {
+    router.push(path)
   }
 }
 
