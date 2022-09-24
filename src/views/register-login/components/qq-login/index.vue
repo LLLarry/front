@@ -12,7 +12,8 @@
 import { onMounted, onUnmounted } from 'vue'
 import { sendMsg, listener, close as broadcaseClose } from '@/utils/broadcase'
 import oauthLogin from '../../oauthLogin'
-import { isMoboleTerminal } from '@/flexible'
+import { isMoboleTerminal } from '@/utils/flexible'
+import { LOGIN_TYPE_QQ } from '@/constants'
 onMounted(() => {
   // 当我们登录成功之后、会缓存起来、下次登录不需要扫码、所以我们需要注销登录、避免用户下次登录时展示上次的记录
   QC.Login(
@@ -31,7 +32,7 @@ onMounted(() => {
 
       if (isMoboleTerminal.value) {
         // 移动端
-        oauthLogin('QQ', data)
+        oauthLogin(LOGIN_TYPE_QQ, data)
       } else {
         // pc端
         // 将data中的用户昵称、和用户头像、以及accessToken发送给主窗口
@@ -48,7 +49,7 @@ onMounted(() => {
   )
   // 监听子窗口发送的用户信息数据； 拿到接收的用户信息（AccessToken， 用户头像、昵称）进行oauthLogin登录尝试
   listener().then((data) => {
-    oauthLogin('QQ', data)
+    oauthLogin(LOGIN_TYPE_QQ, data)
   })
 })
 

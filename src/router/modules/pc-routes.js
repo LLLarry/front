@@ -30,6 +30,11 @@ export default [
         meta: {
           user: true
         }
+      },
+      {
+        path: '/pay/result',
+        name: 'pay-result',
+        component: () => import('@/views/pay/index.vue')
       }
     ]
   },

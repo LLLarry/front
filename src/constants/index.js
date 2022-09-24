@@ -83,8 +83,8 @@ export const DEFAULT_SCROLL_THEME = {
 
 // 登录类型
 export const LOGIN_TYPE_USERNAME = 'username'
-export const LOGIN_TYPE_QQ = 'qq'
-export const LOGIN_TYPE_WX = 'wx'
+export const LOGIN_TYPE_QQ = 'QQ'
+export const LOGIN_TYPE_WX = 'WX'
 
 // 阿里oss配置
 export const REGION = 'oss-cn-beijing'
@@ -100,3 +100,7 @@ export const ROUTER_TYPE_BACK = 'back'
 
 // 登录未注册的状态码
 export const OAUTH_LOGIN_NO_REGISTER_CODE = 204
+
+// 微博
+export const WEI_BO_APP_KEY = '3454329089'
+export const WEI_BO_UID = '5984245953'

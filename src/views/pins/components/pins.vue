@@ -9,7 +9,7 @@
     >
       <svg-icon name="close" class="w-2 h-2 fill-zinc-500"></svg-icon>
     </div>
-    <navbar sticky v-if="isMoboleTerminal">
+    <navbar sticky v-if="isMoboleTerminal" :onClickRight="handleShare">
       {{ pins.title }}
       <template #right>
         <svg-icon name="share" class="fill-zinc-900 w-2.5 h-2.5" />
@@ -33,6 +33,7 @@
           <Button
             class="bg-transparent hover:bg-zinc-400/60 duration-300"
             type="default"
+            @click="handleShare"
           >
             <svg-icon name="share" class="fill-zinc-600 w-2 h-2" />
           </Button>
@@ -60,6 +61,7 @@ import { getPinsById } from '@/api/pexels'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { isMoboleTerminal } from '@/utils/flexible'
 import { useMobileScroll } from '@/utils'
+import weiboShare from '@/utils/weiboShare'
 const props = defineProps({
   id: {
     type: String,
@@ -78,6 +80,14 @@ const goBack = () => {
   router.back()
 }
 getPinsByIdData()
+
+// 分享
+const handleShare = () => {
+  weiboShare(
+    pins.value.photo,
+    `${window.location.origin}/pins/${pins.value.id}`
+  )
+}
 </script>
 
 <style></style>

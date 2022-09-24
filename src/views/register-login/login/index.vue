@@ -83,10 +83,7 @@
           ></svg-icon> -->
           <QQLogin />
 
-          <svg-icon
-            class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
-            name="wexin"
-          ></svg-icon>
+          <WXLogin />
         </div>
       </div>
     </div>
@@ -118,10 +115,13 @@ import SliderCaptchaVue from '../components/slider-captcha/index.vue'
 import { getCaptcha } from '@/api/sys'
 import { ref } from 'vue'
 import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import { LOGIN_TYPE_USERNAME } from '@/constants'
 import QQLogin from '../components/qq-login/index.vue'
+import WXLogin from '../components/wx-login/index.vue'
 
 const store = useStore()
+const route = useRoute()
 const inputValues = ref({})
 const loading = ref(false)
 // 人类行为认证组件是否展示
@@ -143,7 +143,8 @@ const onSuccess = async (arr) => {
     // 在这里发送登录请求
     await store.dispatch('user/handleLogin', {
       ...inputValues.value,
-      loginType: LOGIN_TYPE_USERNAME
+      loginType: LOGIN_TYPE_USERNAME,
+      redirect: route.query.redirect
     })
   } finally {
     loading.value = false

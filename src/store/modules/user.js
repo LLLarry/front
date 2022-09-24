@@ -33,7 +33,7 @@ export default {
         loginType: payload.loginType || LOGIN_TYPE_USERNAME
       })
     },
-    async handleLogin(context, payload) {
+    async handleLogin(context, { redirect, ...payload }) {
       try {
         // 登录、获取token 当有password时，进行md5加密
 
@@ -58,7 +58,7 @@ export default {
           }`
         )
         // 跳转到首页
-        router.replace('/')
+        router.replace(redirect ? decodeURIComponent(redirect) : '/')
       } catch (error) {
         return Promise.reject(error)
       }

@@ -26,6 +26,7 @@
       <Button
         type="default"
         class="dark:bg-zinc-900 duration-300 dark:border-zinc-600"
+        @click="handlePay"
         ><svg-icon name="zhi-fu-bao" class="w-3 h-3 mr-1"></svg-icon
         ><span class="text-[20px] dark:text-zinc-500">支付宝</span></Button
       >
@@ -34,12 +35,22 @@
 </template>
 
 <script setup>
-defineProps({
+import { alipay } from '@/api/pay'
+const props = defineProps({
   selectMenuItem: {
     type: Object,
     default: () => ({})
   }
 })
+const handlePay = async () => {
+  // 支付宝下单
+  const { title, desc } = props.selectMenuItem
+  console.log(props.selectMenuItem)
+  // 获取支付页面地址
+  const { encodeURI } = await alipay(title, 0.01, desc, false)
+  // https://excashier.alipay.com/standard/auth.htm?payOrderId=67ecd10be8c944e38e722017d29cab6b.55#
+  window.location.href = decodeURIComponent(encodeURI)
+}
 </script>
 
 <style></style>

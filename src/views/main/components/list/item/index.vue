@@ -21,6 +21,7 @@
       >
         <!-- 分享 -->
         <Button
+          @click.stop="handleShare(pexel)"
           type="danger"
           class="absolute left-1.5 top-1.5 dark:bg-zinc-900 dark:text-zinc-300 border-none"
           >分享</Button
@@ -83,6 +84,7 @@ import { createRandomColor } from '@/utils'
 import { saveAs } from 'file-saver'
 import Message from '@/libs/message/index'
 import { useFullscreen } from '@vueuse/core'
+import weiboShare from '@/utils/weiboShare'
 
 const props = defineProps({
   pexel: {
@@ -131,6 +133,10 @@ const handleSelectItem = () => {
     translateX,
     translateY
   })
+}
+
+const handleShare = (data) => {
+  weiboShare(data.photo, `${window.location.origin}/pins/${data.id}`)
 }
 </script>
 
