@@ -37,8 +37,8 @@
 
 <script setup>
 import { isMoboleTerminal } from '@/utils/flexible'
-import {  getProfile } from '@/api/sys'
-import {  alipayResult } from '@/api/pay'
+import { getProfile } from '@/api/sys'
+import { alipayResult } from '@/api/pay'
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
@@ -53,7 +53,7 @@ const getPayStatus = async () => {
 }
 getPayStatus()
 // 重新获取用户信息，并跳转到首页
-const handleConfirm = () => {
+const handleConfirm = async () => {
   const userInfo = await getProfile()
   store.commit('user/setUserInfo', userInfo)
   router.push('/')
