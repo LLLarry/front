@@ -6143,3 +6143,1911 @@ const handleClick = () => {
 }
 </script>
 ```
+
+### 43、前台业务下H5的应用场景
+
+通常情况下我们说起移动端项目,指的一般是两种:
+
+* 1．原生APP
+
+* 2.H5网页
+
+那么此时我们所做的这个移动端,指的其实就是H5 网页
+
+该内容依然是以网页为主,但是被运行到手机端之中。
+
+而H5网页应用到手机端的时候,通常也是有两种运行的形式;
+
+ * 1.直接在手机端浏览器中运行:这种使用情况相对较少。在这种情况下，用户明显的知道这就是一个网页。
+
+ * 2.在原生组件WebView 中运行（混合开发):通常会被嵌入到 APP 之中，这种使用情况比较多。所以以下内容，主要针对这种情况进行说明。
+
+**那么这种情况下，用户会认为该内容是 APP的一部分，不会把它当成网页，而是会把它当做原生APP。那么一旦用户把它作为 APP来进行衡量,那么就会对这块应用有更高的要求。**
+
+**比如，在移动app下具有以下功能：**
+
+* 1、页面跳转过渡特效
+* 2、页面回退不会重新请求、会保存数据
+* 3、页面回退会保存滚动位置
+
+...
+
+### 44、过渡动画 - 组件跳转
+
+在vue-router官网已经给出了路由跳转的动画
+
+```vue
+<router-view v-slot="{ Component }">
+    <!-- 过渡组件 -->
+  <transition name="fade">
+      <component :is="Component" /> 
+  </transition>
+</router-view>
+```
+
+> 注意：在路由组件进行动画时，只能对有单个根节点的组件有过渡动画、对有多个根节点的组件无法执行过渡动画
+
+**警告信息如下**：
+
+![image-20220919095816842](images/image-20220919095816842.png)
+
+我们只需要把
+
+```vue
+template>
+  <div class="h-full overflow-auto">
+    <!-- <div>这是移动端mian页面</div> -->
+    <div class="sticky left-0 top-0 right-0 z-10 duration-300">
+      <navigation />
+    </div>
+    <!-- 瀑布流部分 -->
+    <div class="max-w-screen-xl mx-auto px-1 xl:px-0">
+      <list />
+    </div>
+  </div>
+
+  <trigger-menu
+    class="fixed w-[280px] left-[50%] bottom-[30px] translate-x-[-50%]"
+    v-if="isMoboleTerminal"
+  >
+    <trigger-menu-item icon="home" to="/"> 首页 </trigger-menu-item>
+    <trigger-menu-item icon="vip" v-if="isLogin"> VIP </trigger-menu-item>
+    <trigger-menu-item icon="profile" @click="handleProfile">
+      {{ isLogin ? '我的' : '去登陆' }}
+    </trigger-menu-item>
+  </trigger-menu>
+</template>
+
+```
+
+改为
+
+```vue
+<template>
+  <div class="h-full overflow-auto">
+    <!-- <div>这是移动端mian页面</div> -->
+    <div class="sticky left-0 top-0 right-0 z-10 duration-300">
+      <navigation />
+    </div>
+    <!-- 瀑布流部分 -->
+    <div class="max-w-screen-xl mx-auto px-1 xl:px-0">
+      <list />
+    </div>
+	
+     <!-- 挪到里面 -->
+    <trigger-menu
+      class="fixed w-[280px] left-[50%] bottom-[30px] translate-x-[-50%]"
+      v-if="isMoboleTerminal"
+    >
+      <trigger-menu-item icon="home" to="/"> 首页 </trigger-menu-item>
+      <trigger-menu-item icon="vip" v-if="isLogin"> VIP </trigger-menu-item>
+      <trigger-menu-item icon="profile" @click="handleProfile">
+        {{ isLogin ? '我的' : '去登陆' }}
+      </trigger-menu-item>
+    </trigger-menu>
+  </div>
+</template>
+```
+
+
+
+#### 44.1、首先我们先看一下实现的效果
+
+
+
+![20220919_173609](images/20220919_173609.gif)
+
+#### 44.2、实现动画的思路
+
+1、 我们通过上述动画可以分析出动画分为两种：
+
+* 第一种：**进场动画**（push）
+  * 出场组件：从右向左
+  * 进场组件：从右向左
+  * 执行时间：出场组件和进场组件是同时进行的
+* 第二种：**出场动画**（back）
+  * 出场组件：从左向右
+  * 进场组件：从左向右
+  * 执行时间：出场组件和进场组件是同时进行的
+* 第三种： **不加动画**（在pc端跳转时，是不加动画的）
+
+通过分析、我们可以写通过下列`css`代码实现基本的过渡特效
+
+```css
+/* push 进场动画 */
+.push-enter-from {
+  transform: translateX(100%);  
+}
+.push-leave-to {
+  transform: translateX(-50%);
+}
+.push-enter-active,
+.push-leave-active {
+  transition: all 0.4s ease-in-out;
+}
+/* back 出场动画 */
+.back-enter-from {
+  transform: translateX(-100%);
+}
+.back-leave-to {
+  transform: translateX(50%);
+}
+
+.back-enter-active,
+.back-leave-active {
+  transition: all 0.4s ease-in-out;
+}
+```
+
+
+
+2、 我们重写`router`的`push`、`back`和其他方法；目的是当跳转之前记录当前操作是**入栈**还是**出栈**
+
+比如：
+
+```js
+const originPush = router.push
+const originBack = router.back
+// 前进操作
+router.push = function (...argu) {
+  store.commit('app/changeRouterType', 'push')
+  originPush.apply(this, argu)
+}
+// 后退操作
+router.back = function (...argu) {
+  store.commit('app/changeRouterType', 'back')
+  originBack.apply(this, argu)
+}
+```
+
+3、在`vuex`中拿到保存的当前跳转是**入栈**还是**出栈**，然后修改对应的`transition`组件的`name`属性来执行对应的动画
+
+```vue
+<template>
+  <router-view v-slot="{ Component }">
+    <transition
+      :name="transitionName"
+      @before-enter="onBeforeEnter"
+      @after-enter="onAfterEnter"
+    >
+      <component :is="Component" />
+    </transition>
+  </router-view>
+</template>
+```
+
+> 注意细节： 我们在组件切换时执行的动画是两个路由组件同时存在页面中的、所以就要处理 **两个组件同时存在时 上下排布的问题**
+>
+> 我们可以对即将进入页面的组件加上 **固定定位、让其固定在视口的位置**，然后在动画执行完成后、将**固定定位给移除**
+
+```js
+// 组件进入之前的回调， 设置组件为固定定位
+const onBeforeEnter = (el) => {
+  el.style = 'position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;'
+}
+// 进入之后的回调，移除固定定位
+const onAfterEnter = (el) => {
+  el.removeAttribute('style')
+}
+```
+
+#### 44.3、组件跳转动画实现总流程
+
+* 1、在`constants`中定义常量
+
+  ```js
+  // 路由跳转动画类型
+  // 不执行
+  export const ROUTER_TYPE_NONE = 'none'
+  // 前进类型
+  export const ROUTER_TYPE_PUSH = 'push'
+  // 回退类型
+  export const ROUTER_TYPE_BACK = 'back'
+  ```
+
+  
+
+* 2、在`vuex`中存储`routerType`(当前跳转类型、none、push、back)
+
+  ```js
+  import { ALL_CATEGOARY_ITEM, ROUTER_TYPE_NONE } from '@/constants'
+  export default {
+    namespaced: true,
+    state() {
+      return {
+        routerType: ROUTER_TYPE_NONE // 跳转类型
+      }
+    },
+    mutations: {
+      changeRouterType(state, routerType) {
+        state.routerType = routerType
+      }
+    }
+  }
+  ```
+
+* 3、重写router中的跳转方法，在路由跳转之前先缓存跳转动画类型
+
+  ```js
+  const router = createRouter({
+    history: createWebHistory(),
+    routes: isMoboleTerminal.value ? mobileRoutes : pcRoutes
+  })
+  // 重写router跳转方法 
+  const originPush = router.push
+  const originBack = router.back
+  // 前进操作
+  router.push = function (...argu) {
+    store.commit('app/changeRouterType', ROUTER_TYPE_PUSH)
+    originPush.apply(this, argu)
+  }
+  // 后退操作
+  router.back = function (...argu) {
+    store.commit('app/changeRouterType', ROUTER_TYPE_BACK)
+    originBack.apply(this, argu)
+  }
+  export default router
+  ```
+
+* 4、封装`transition-router-view`组件
+
+  ```vue
+  <template>
+    <router-view v-slot="{ Component }">
+      <transition
+        :name="transitionName"
+        @before-enter="onBeforeEnter"
+        @after-enter="onAfterEnter"
+      >
+        <component :is="Component" />
+      </transition>
+    </router-view>
+  </template>
+  
+  <script setup>
+  import { useRouter, useRoute } from 'vue-router'
+  
+  import {
+    ROUTER_TYPE_NONE,
+    ROUTER_TYPE_PUSH,
+    ROUTER_TYPE_BACK
+  } from '@/constants'
+  import { computed } from 'vue-demi'
+  const props = defineProps({
+    routerType: {
+      type: String,
+      validator(v) {
+        const routerTypes = [ROUTER_TYPE_NONE, ROUTER_TYPE_PUSH, ROUTER_TYPE_BACK]
+        if (!routerTypes.includes(v)) {
+          throw new TypeError(`routerTypes must be ${routerTypes.join(',')}`)
+        }
+        return true
+      }
+    },
+    mainComponentName: {
+      type: String,
+      required: true
+    }
+  })
+  const route = useRoute()
+  
+  const transitionName = computed(() => `${props.routerType}`)
+  
+  // 组件进入之前的回调， 设置组件为固定定位
+  const onBeforeEnter = (el) => {
+    el.style = 'position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;'
+  }
+  // 进入之后的回调，移除固定定位
+  const onAfterEnter = (el) => {
+    el.removeAttribute('style')
+  }
+  </script>
+  
+  <style lang="scss" scoped>
+  .push-enter-from {
+    transform: translateX(100%);
+  }
+  .push-leave-to {
+    transform: translateX(-50%);
+  }
+  .push-enter-active,
+  .push-leave-active {
+    transition: all 0.4s ease-in-out;
+  }
+  
+  .back-enter-from {
+    transform: translateX(-100%);
+  }
+  .back-leave-to {
+    transform: translateX(50%);
+  }
+  
+  .back-enter-active,
+  .back-leave-active {
+    transition: all 0.4s ease-in-out;
+  }
+  </style>
+  
+  ```
+
+* 5、使用组件
+
+  ```vue
+  <transition-router-view
+        :routerType="$store.getters.routerType"
+        mainComponentName="main"
+      />
+  ```
+
+  
+
+### 45、缓存组件 - 任务栈
+
+在`vue`中提供了一个内置组件来缓存组件： [`keep-alive`](https://cn.vuejs.org/api/built-in-components.html#keepalive)
+
+```vue
+<router-view v-slot="{ Component }">
+    <!-- 过渡组件 -->
+  <transition name="fade">
+      <!-- 缓存组件 -->
+    <keep-alive>
+      <component :is="Component" /> 
+     </keep-alive>
+  </transition>
+</router-view>
+```
+
+
+
+但是同样有一点，大家需要注意:**不是所有的组件都需要缓存。**
+我们把: **组件的进入和退出流程,比作一个栈。**
+**那么只有进入到栈中的组件才需要被缓存**，这就像 Android 中的任务栈概念一样，如下图所示:
+
+![image-20220917173253252](images/image-20220917173253252.png)
+
+在当前咱们移动端的组件处理中，我们同样期望有一个这样的栈来维护我们的组件进入和退出流程，所以我们把这样的一套流程，称作**:虚拟任务栈**
+
+那么对于这样的一**个虚拟任务栈**而言，
+
+我们可以通过数组来进行维护，因为数组与栈的概念相同都是(先进后出的流程）。
+
+然后我们可以通过`keep-alive` 中的 `include` 概念，把**虚拟任务栈–数组**进行绑定，从而实现**任务栈的缓存概念**。
+
+#### 45.1、实现思路
+
+我们先看一下实现效果
+
+![20220920_105324](images/20220920_105324.gif)
+
+* 1、在**路由表**和**组件**中都添加对应的**name**属性；且要设置name属性值是相同的
+
+  >注意： 路由表中的name属性和组件的name属性的作用是不同的：
+  >
+  >* 路由表中的name： 是做路由跳转的，可以在push（{name: 'home'}）进行跳转
+  >* 组件name属性：一般是在`devtools`中更容易的区分某个组件、和**keep-alive中也是通过组件name来进行缓存的**
+
+路由name配置
+  ```js
+  {
+    path: '/',
+    name: 'main', // + 添加name属性
+    component: () => import('@/views/main/index.vue')
+  },
+  ```
+组件name配置
+```js
+<script>
+export default {
+  name: 'main'
+}
+</script>
+```
+
+* 2、监听路由跳转、在跳转之前保存跳转路由表的name属性值
+
+  ```js
+  const virtualTaskList = ref([mainComponentName])
+  router.beforeEach((to, from) => {
+      // 获取当前跳转类型 push / back
+      const routerType = store.getters.routerType
+      // 当跳转到首页时，清空任务栈、只保留首页的任务栈
+      if (to.name === mainComponentName) {
+        cleanVirtualTaskList()
+      } else if (routerType === ROUTER_TYPE_PUSH) {
+        // 入栈操作
+        virtualTaskList.value.push(to.name)
+      } else if (routerType === ROUTER_TYPE_BACK) {
+        // 出栈操作
+        virtualTaskList.value.pop()
+      }
+    })
+  ```
+
+  
+
+* 3、使用`keep-alive`组件配合`include`属性实现动态缓存组件
+
+  ```vue
+  <router-view v-slot="{ Component }">
+      <transition
+        :name="transitionName"
+        @before-enter="onBeforeEnter"
+        @after-enter="onAfterEnter"
+      >
+        <!-- 在页面跳转之前、将缓存的组件name属性值放到virtualTaskList中；当模板解析到此处时，会判断virtualTaskList数组中是否包含当前模板的name属性值？ 包含则缓存、不包含则不缓存 -->
+        <!-- 动态组件，加key的作用是处理/user/1 和 /user/2这样的情况 -->
+        <keep-alive :include="virtualTaskList"> <!-- + 缓存组件 virtualTaskList 当前组件的name如果匹配到 数组内的name就会被缓存 -->
+          <component :is="Component" :key="$route.fullPath" />
+        </keep-alive>
+      </transition>
+    </router-view>
+  ```
+  
+  
+
+#### 45.2、缓存组件 - 实现完成代码
+
+* 步骤1：配置**路由表**和**组件**中都添加对应的**name**属性；且要设置name属性值是相同的
+
+* 步骤2：监听路由跳转、在跳转之前保存跳转路由表的name属性值
+
+我们可以封装处理 **虚拟任务栈hook**
+
+useVirtualTask.js
+
+```js
+/**
+ * 处理虚拟任务栈
+ */
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+import {
+  ROUTER_TYPE_NONE,
+  ROUTER_TYPE_PUSH,
+  ROUTER_TYPE_BACK
+} from '@/constants'
+export default (mainComponentName) => {
+  // 虚拟任务栈数据， 里面存放的是组件的name属性值
+  const virtualTaskList = ref([mainComponentName])
+  const router = useRouter()
+  const store = useStore()
+
+  // 监听页面跳转 注意： to.name 是路由对象name属性,一般是用来做跳转的、而keep-alive的include属性判断的是组件name属性，两者是不同的
+  // 这里缓存的是路由对象name属性，所以就要求我们在定义组件和路由时，name保持一致
+  router.beforeEach((to, from) => {
+    // 获取当前跳转类型 push / back
+    const routerType = store.getters.routerType
+    // 当跳转到首页时，清空任务栈、只保留首页的任务栈
+    if (to.name === mainComponentName) {
+      cleanVirtualTaskList()
+    } else if (routerType === ROUTER_TYPE_PUSH) {
+      // 入栈操作
+      virtualTaskList.value.push(to.name)
+    } else if (routerType === ROUTER_TYPE_BACK) {
+      // 出栈操作
+      virtualTaskList.value.pop()
+    }
+  })
+
+  // 清空虚拟任务栈
+  const cleanVirtualTaskList = () => {
+    virtualTaskList.value = [mainComponentName]
+  }
+  return virtualTaskList
+}
+
+```
+
+* 步骤3：使用`keep-alive`组件配合`include`属性实现动态缓存组件
+
+```vue
+<template>
+  <router-view v-slot="{ Component }">
+    <transition
+      :name="transitionName"
+      @before-enter="onBeforeEnter"
+      @after-enter="onAfterEnter"
+    >
+      <!-- 在页面跳转之前、将缓存的组件name属性值放到virtualTaskList中；当模板解析到此处时，会判断virtualTaskList数组中是否包含当前模板的name属性值？ 包含则缓存、不包含则不缓存 -->
+      <!-- 动态组件，加key的作用是处理/user/1 和 /user/2这样的情况 -->
+      <keep-alive :include="virtualTaskList">
+        <component :is="Component" :key="$route.fullPath" />
+      </keep-alive>
+    </transition>
+  </router-view>
+</template>
+
+<script setup>
+import { useRouter, useRoute } from 'vue-router'
+
+import {
+  ROUTER_TYPE_NONE,
+  ROUTER_TYPE_PUSH,
+  ROUTER_TYPE_BACK
+} from '@/constants'
+import { computed } from 'vue'
+import useVirtualTask from './useVirtualTask'
+const props = defineProps({
+  routerType: {
+    type: String,
+    validator(v) {
+      const routerTypes = [ROUTER_TYPE_NONE, ROUTER_TYPE_PUSH, ROUTER_TYPE_BACK]
+      if (!routerTypes.includes(v)) {
+        throw new TypeError(`routerTypes must be ${routerTypes.join(',')}`)
+      }
+      return true
+    }
+  },
+  mainComponentName: {
+    // 首页组件名称；当跳转到首页时，清空任务栈
+    type: String,
+    required: true
+  }
+})
+const route = useRoute()
+
+const transitionName = computed(() => `${props.routerType}`)
+
+// 组件进入之前的回调， 设置组件为固定定位
+const onBeforeEnter = (el) => {
+  el.style = 'position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;'
+}
+// 进入之后的回调，移除固定定位
+const onAfterEnter = (el) => {
+  el.removeAttribute('style')
+}
+const virtualTaskList = useVirtualTask(props.mainComponentName)
+</script>
+
+<style lang="scss" scoped>
+.push-enter-from {
+  transform: translateX(100%);
+}
+.push-leave-to {
+  transform: translateX(-50%);
+}
+.push-enter-active,
+.push-leave-active {
+  transition: all 0.4s ease-in-out;
+}
+
+.back-enter-from {
+  transform: translateX(-100%);
+}
+.back-leave-to {
+  transform: translateX(50%);
+}
+
+.back-enter-active,
+.back-leave-active {
+  transition: all 0.4s ease-in-out;
+}
+</style>
+
+```
+
+### 46、缓存滚动位置 - 组件跳转
+
+什么是缓存滚动位置？
+
+​	比如我们在首页长列表中、滚动某个位置、跳转到其他页面；再会退回来还能保持到上一次滚动的位置 ；
+
+我们先看一下效果：
+
+![20220920_1420](images/20220920_1420.gif)
+
+#### 46.1、实现思路
+
+**方案1：** 利用`vue-router`提供的**滚动行为**[`scrollBehavior`](https://router.vuejs.org/zh/guide/advanced/scroll-behavior.html)
+
+> **这个功能只在支持 history.pushState 的浏览器中可用**
+
+使用也很简单，就是在配置项中，添加`scrollBehavior` 方法
+
+```js
+const router = createRouter({
+  history: createWebHistory(),
+  routes: isMoboleTerminal.value ? mobileRoutes : pcRoutes,
+  scrollBehavior(to, from, savedPosition) {
+    console.log(to, from, savedPosition)
+    return savedPosition // 保存上次滚动的位置对象 { left: xx, top: xx }
+    // 也可以手动指定滚动的位置
+    // return { top: xx }
+  }
+})
+```
+
+> 缺点：
+>
+> 1、目前暂时不能再`<transition></transition>`包裹的组件下使用，在`transition`组件下滚动到执行位置会失效 [官方issues](https://github.com/vuejs/vue-router/issues/675)也说明叻这一点
+>
+> 2、**组件的根节点必须作为滚动子元素才能保存组件滚动位置；**根节点不能作为滚动父节点
+
+**方案2：**使用`compionition Api` 分装自定义hook
+
+vue3也推荐我们使用此方法来复用多个组件的公共逻辑；
+
+此方案思路：
+
+* 1、在组件中监听滚动的位置
+* 2、在组件**被重新激活时（onActivated）**取到上次存储的位置、把这个值设置到根元素的`scrollTop`上
+
+> 缺点：由于我们的路由组件比较多，每写一个组组件都要手动引入一下；有点繁琐
+
+**方案3：**使用`mixin`全局混入
+
+此方案实现思路和方案二类似，只是实现过程与之有所差别
+
+需要注意的是：我们在全局混入，这时`vue`实例中所有的组件都具有`mixin`所混入的内容；我们需要手动剔除一些不符合条件的组件（不是路由组件的组件）；
+
+优点：一次引入、新创建的组件也不需要额外的引入
+
+
+
+#### 46.2、缓存组件 - 完整实现
+
+本次采用方案3 - mixin
+
+* 1、创建 `asstes/js/saveScroll.js`
+
+  ```js
+  export default {
+    data() {
+      return {
+        __scrollTop: 0, // 当前组件Y轴滚动的距离
+        __isRouterComponent: false // 是否是路由组件
+      }
+    },
+    mounted() {
+      // 判断组件的根组件是不是路由组件
+      this.__isRouterComponent = this.$el.parentNode.parentNode.isEqualNode(
+        document.querySelector('#app')
+      )
+      if (!this.__isRouterComponent) return false
+        // 注册滚动事件
+      this.$el && this.$el.addEventListener('scroll', this.__handleScroll)
+    },
+    activated() {
+      if (!this.__isRouterComponent) return false
+        // 组件被重新激活时，重新将缓存的Y轴距离设置到根标签上
+      this.$el.scrollTop = this.__scrollTop
+    },
+    beforeUnmount() {
+      if (!this.__isRouterComponent) return false
+        // 卸载之前，解绑事件
+      this.$el && this.$el.removeEventListener('scroll', this.__handleScroll)
+    },
+    methods: {
+      __handleScroll() {
+        this.__scrollTop = this.$el.scrollTop
+      }
+    }
+  }
+  
+  ```
+
+  
+
+在mian.js中使用
+
+```js
+import saveScroll from '@/assets/js/saveScroll'
+
+
+createApp(App)
+  .use(router)
+  .use(store)
+  .use(libs)
+  .use(directives)
+  .mixin(saveScroll) // + 添加mixin混入对象
+  .mount('#app')
+```
+
+### 47、通用组件 - 倒计时组件
+
+特惠部分存在一个倒计时的功能，所以我们需要先处理对应的倒计时模块，并把它处理成一个通用组件。
+
+**那么对于倒计时模块我们又应该如何进行处理呢?**
+所谓倒计时，其实更多的是一个时间的处理，那么对于时间的处理，此时我们就需要使用到一个第三方的包: dayis。通过这个包我们可以处理对应的倒计时格式问题。
+
+那么时间格式处理完成之后，接下来我们就需要处理对应的数据:
+我们期望对倒计时模块,可以传递两个值:
+
+1. `time`毫秒值:表示倒计时的时长
+2. format格式:表示倒计时的展示格式
+
+那么到这里咱们整个的倒计时功能即使就分析的差不多了，总共分成了两部分:
+  1．时间格式
+  2．数据
+
+```vue
+<template>
+  <slot :data="{ timeStr, timeValue }">
+    <div>
+      {{ timeStr }}
+    </div>
+  </slot>
+</template>
+
+<script setup>
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import 'dayjs/locale/zh-cn'
+import { watch, ref, computed, onUnmounted } from 'vue'
+
+dayjs.extend(duration)
+dayjs.locale('zh-cn')
+let timer = null
+const props = defineProps({
+  time: {
+    // 倒计时时间， ms单位
+    type: Number,
+    required: true
+  },
+  format: {
+    // 格式化时间
+    type: String,
+    default: 'HH小时mm分钟ss秒SSS'
+  }
+})
+
+// 组件销毁时清理定时器
+onUnmounted(() => {
+  close()
+})
+const timeValue = ref(props.time)
+
+// 封装格式化日期函数
+const fmtTime = (milliseconds) => {
+  const d = dayjs.duration(milliseconds)
+  return d.format(props.format)
+}
+
+const handleSetInterval = () => {
+  timer = setInterval(() => {
+    if (typeof timeValue.value === 'number' && timeValue.value <= 0) {
+      //完成
+      close()
+    } else {
+      timeValue.value -= 9
+    }
+  }, 9)
+}
+const timeStr = computed(() => {
+  return typeof timeValue.value === 'number' ? fmtTime(timeValue.value) : ''
+})
+/**
+ * 关闭定时器
+ */
+const close = () => {
+  clearInterval(timer)
+}
+/**
+ * 开启定时器
+ */
+const start = () => {
+  handleSetInterval()
+}
+/**
+ * 从新设置定时器
+ */
+const reset = (v) => {
+  const setV = v > 0 ? v : props.time
+  timeValue.value = setV
+}
+watch(
+  () => props.time,
+  (v) => {
+    timeValue.value = v
+    close()
+    start()
+  },
+  {
+    immediate: true
+  }
+)
+
+defineExpose({
+  close,
+  start,
+  reset,
+  timeStr,
+  timeValue
+})
+</script>
+
+```
+
+### 48、第三方平台登录解决方案流程大解析
+
+
+通常情况下我们所说的第三方登录，多指的是:**通过第三方APP进行登录**
+
+那么我们这个第三方的 `APP` 是如何和我们自己的应用进行关联的呢?
+
+如果大家不是很清楚，那么本小节将为你解答。
+想要搞明白这个问题，那么我们首先需要搞清楚整个第三方登录的流程是如何进行的。
+
+**我们以常见app第三方登录为例:**
+
+* 1.点击第三方登录按钮
+* 2.弹出一个小窗口，展示对应二维码
+* 3.手机打开对应的 APP进行扫码之后，会跳转到同意页面，同时浏览器端也会显示扫码成功
+* 4.手机端操作同意登录之后,会出现两种情况:
+  * 1．当前用户已注册:直接登录
+  * 2.当前用户未注册:执行注册功能
+
+
+
+**详细流程如下**：
+
+* 1.点击第三方登录按钮:执行 `window.open`方法，打开一个第三方指定的`URL`窗口，该地址会指向第三方登录的`URL`,并且由第三方提供一个对应的二维码
+* 2.弹出一个小窗口，展示对应二维码: **此处展示的二维码，即为上一步中第三方提供的二维码**
+* 3.**手机打开对应的 `APP`进行扫码之后，会跳转到同意页面，同时浏览器端也会显示扫码成功:在第三方中会一直对该页面进行轮询,配合第三方APP 来判断是否扫码成功**
+* 4.**手机端操作同意登录之后，会出现两种情况:在 APP 中同意之后，第三方会进行对应的跳转，跳转地址为你指定的地址，在该地址中可以获取到第三方的用户信息，该信息即为第三方登录时要获取到的关键数据**
+* 5**.至此，第三方操作完成。接下来需要进行本平台的登录判定。**
+  * 1．该注册指的是第三方用户是否在本平台中进行了注册。
+  * 2.因为在之前的所有操作中，我们拿到的是第三方的用户信息。
+  * 3.该信息可以帮助我们直接显示对用的用户名和头像，但是因为不包含关键信息（手机号、用户名、密码）所以我们无法使用该信息帮助用户直接登录
+  * 4．所以我们需要判断当前用户是否在咱们自己的平台中完成了注册
+    * 1.当前用户已注册:直接登录
+    * 2.当前用户未注册:执行注册功能
+
+#### 48.1、QQ开放平台流程大解析
+
+那么接下来我们先来处理`QQ`第三方登录功能。
+想要对接`QQ`登录，那么需要使用到[`QQ`互联平台](https://connect.qq.com/index.html)，在该平台中:
+1．注册账户
+
+2.认证开发者
+
+3.注册应用
+
+
+
+#### 48.2、QQ登录对接流程: 获取QQ用户信息
+
+[官网文档](https://wiki.connect.qq.com/js_sdk%e4%bd%bf%e7%94%a8%e8%af%b4%e6%98%8e)
+
+对接`QQ`登录分为以下几步:
+
+* 1．展示`QQ`登录二维码
+* 2．获取用户信息
+* 3.完成跨页面数据传输
+* 4．认证是否已注册分
+* 5．完成`QQ`对接
+
+
+
+**展示`QQ`登录二维码**
+
+1、在`index.html`中引入`QQ`的`SDK`
+
+```html
+<!-- QQ 登录 -->
+    <script
+      type="text/javascript"
+      charset="utf-8"
+      src="https://connect.qq.com/qc_jssdk.js"
+      data-appid="[你的appid]"
+      data-redirecturi="[你在QQ互联中配置的成功之后的回调]"
+    ></script>
+```
+
+2、创建`qq-login`组件、来凤凰qq登录组件
+
+```vue
+<template>
+  <div class="qq-connect-box">
+    <span id="qqLoginBtn"></span>
+    <svg-icon
+      class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
+      name="qq"
+    ></svg-icon>
+  </div>
+</template>
+
+<script setup>
+import { onMounted } from 'vue'
+onMounted(() => {
+  QC.Login(
+    {
+      btnId: 'qqLoginBtn' //插入按钮的节点id
+    },
+    (data, ops) => {
+      console.log(data, '登录成功')
+    }
+  )
+})
+</script>
+
+```
+
+![image-20220922145401409](images/image-20220922145401409.png)
+
+上面的图片可以得知、`qqLoginBtn`就是放置调起二维码按钮的地方、点击`qqLoginBtn`标签中的a链接、可以调起二维码；但是这样写有太丑；所以我们可以将a链接的透明度设置为0，并且置于最下方即可;css如下
+
+```vue
+<style lang="scss" scoped>
+.qq-connect-box {
+  position: relative;
+  &:deep(#qqLoginBtn) {
+    a {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1px;
+      opacity: 0;
+    }
+  }
+}
+</style>
+```
+
+**完整示例**
+
+
+
+```vue
+<template>
+  <div class="qq-connect-box">
+    <span id="qqLoginBtn"></span>
+    <svg-icon
+      class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
+      name="qq"
+    ></svg-icon>
+  </div>
+</template>
+
+<script setup>
+import { onMounted } from 'vue'
+onMounted(() => {
+  // 当我们登录成功之后、会缓存起来、下次登录不需要扫码、所以我们需要注销登录、避免用户下次登录时展示上次的记录
+  QC.Login(
+    {
+      btnId: 'qqLoginBtn' //插入按钮的节点id
+    },
+    (data, ops) => {
+      // 扫码授权登录成功后的回到
+      console.log(data, '登录成功')
+      // 注销登录
+      QC.Login.signOut()
+      // 登录成功的回调
+      // https://imooc-front.lgdsunday.club/login#access_token=4723B87EC749FA12A7247F40975D7BFB&expires_in=7776000
+      // 解析地址栏地址获取token
+      const accessToken = getQQAccessToken()
+      // 将data中的用户昵称、和用户头像、以及accessToken发送给后台
+      // TODO
+    }
+  )
+})
+
+const getQQAccessToken = () => {
+  const hash = window.location.hash || ''
+  const reg = /access_token=(.+)&expires_in/
+  return hash.match(reg)[1]
+}
+</script>
+
+<style lang="scss" scoped>
+.qq-connect-box {
+  position: relative;
+  &:deep(#qqLoginBtn) {
+    a {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1px;
+      opacity: 0;
+    }
+  }
+}
+</style>
+
+```
+
+![image-20220922151658244](images/image-20220922151658244.png)
+
+> 注意：扫码成功重定向的地址是在小窗口打开的、并不是在原来的窗口打开、登录成功的回调也是在小窗口中回调
+
+#### 48.3、 `QQ`登录对接流程:跨页面信息传输
+
+由于拿到扫码用户的 `AccessToken` 和 用户的信息（昵称、头像...） 都是在小窗口上获取到的；
+
+**这小节最要作用:就是将小窗口获取到的这些信息传递给主窗口上**
+
+**想要实现跨页面信息传输,通常由两种方式:**
+
+* 1、[`BroadcastChannel`](https://developer.mozilla.org/zh-CN/docs/Web/API/BroadcastChannel):允许同源的不同浏览器窗口,Tab页，`frame`或者`iframe`下的不同文档之间相互通信。但是会存在兼容性问题,实测`Safari15.3` 无法使用
+* 2、`localStorage` + `window.onstorage`: 通过`localStorage`进行同源的数据传输。用来处理`BroadcastChannel`不兼容的浏览器。
+  那么依据以上两个API，我们实现对应的通讯模块:
+
+utils/broadcase.js
+
+```js
+/***
+ * 向同源且不同tab标签页发送数据
+ */
+
+// BroadcastChannel的信道key； 或者localStorage的设置项的key
+const BROAD_CASE_CHANNEL_KEY = 'BROAD_CASE_CHANNEL_KEY'
+// BroadcastChannel实例
+let broadcastChannel = null
+if (window.BroadcastChanne) {
+  // 创建BroadcastChannel实例
+  broadcastChannel = new window.BroadcastChanne(BROAD_CASE_CHANNEL_KEY)
+}
+/**
+ * 发送数据
+ * @param {*} data 发送的数据包
+ */
+export const sendMsg = (data) => {
+  if (broadcastChannel) {
+    broadcastChannel.postMessage(data)
+  } else {
+    window.localStorage.setItem(BROAD_CASE_CHANNEL_KEY, JSON.stringify(data))
+  }
+}
+
+/**
+ * 监听数据传输
+ * @returns promise对象
+ */
+export const listener = () => {
+  return new Promise((resolve, reject) => {
+    if (broadcastChannel) {
+      broadcastChannel.onmessage = (event) => {
+        resolve(event.data)
+      }
+    } else {
+      window.onstorage = (event) => {
+        if (event.key === BROAD_CASE_CHANNEL_KEY) {
+          resolve(event.newValue)
+        }
+      }
+    }
+  })
+}
+
+/**
+ * 关闭监听
+ */
+export const close = () => {
+  if (broadcastChannel) {
+    broadcastChannel.close()
+  } else {
+    window.localStorage.removeItem(BROAD_CASE_CHANNEL_KEY)
+  }
+}
+
+```
+
+在`qq-login`组件中进行使用
+
+```vue
+<template>
+  <div class="qq-connect-box">
+    <span id="qqLoginBtn"></span>
+    <svg-icon
+      class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
+      name="qq"
+    ></svg-icon>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, onUnmounted } from 'vue'
+import { sendMsg, listener, close as broadcaseClose } from '@/utils/broadcase'
+import oauthLogin from '../../oauthLogin'
+onMounted(() => {
+  // 当我们登录成功之后、会缓存起来、下次登录不需要扫码、所以我们需要注销登录、避免用户下次登录时展示上次的记录
+  QC.Login(
+    {
+      btnId: 'qqLoginBtn' //插入按钮的节点id
+    },
+    (data, ops) => {
+      // 扫码授权登录成功后的回到
+      console.log(data, '登录成功')
+      // 注销登录
+      QC.Login.signOut()
+      // 登录成功的回调
+      // https://imooc-front.lgdsunday.club/login#access_token=4723B87EC749FA12A7247F40975D7BFB&expires_in=7776000
+      // 解析地址栏地址获取token
+      const accessToken = getQQAccessToken()
+      // 将data中的用户昵称、和用户头像、以及accessToken发送给主窗口
+      sendMsg({
+        ...data,
+        accessToken
+      })
+      // 发送之后关闭子窗口
+      setTimeout(() => {
+        window.close()
+      })
+    }
+  )
+  // 监听子窗口发送的用户信息数据； 拿到接收的用户信息（AccessToken， 用户头像、昵称）进行oauthLogin登录尝试
+  listener().then((data) => {
+    oauthLogin('QQ', data)
+  })
+})
+
+// 页面卸载之前关闭监听
+onUnmounted(() => {
+  broadcaseClose()
+})
+
+const getQQAccessToken = () => {
+  const hash = window.location.hash || ''
+  const reg = /access_token=(.+)&expires_in/
+  return hash.match(reg)[1]
+}
+</script>
+
+
+```
+
+
+
+#### 48.4、`QQ`登录对接流程：QQ登录处理
+
+现在、我们在主窗口能获取到子窗口传过来的**用户信息（AccessToken， 用户头像、昵称）**
+
+剩下的我们只需要进行以下操作：
+
+* 拿到**用户信息（AccessToken， 用户头像、昵称）**发送登录请求
+  * 登录返回code为204，表示用户未注册，需要携带者**用户信息（AccessToken， 用户头像、昵称）**跳转至**注册页面**
+    * 在注册页，带着**用户信息（AccessToken， 用户头像、昵称）**和 **用户名、密码** 发送注册请求
+  * 返回code非204、表示注册成功、跳转至首页
+
+
+
+我们封装一个`oauthLogin`方法，是专门处理第三方授权跳转的
+
+```js
+import store from '@/store'
+import router from '@/router'
+import { OAUTH_LOGIN_NO_REGISTER_CODE } from '@/constants'
+/**
+ * @param loginType 登录类型 QQ、WX
+ * @param data 登录时需要传递的数据
+ */
+export default async (loginType, data) => {
+  // 带着accessToken和用户信息进行登录尝试
+  const code = await store.dispatch('user/handleLogin', {
+    loginType,
+    ...data
+  })
+  // code为 204 用户未进行注册
+  if (code === OAUTH_LOGIN_NO_REGISTER_CODE) {
+    return router.push({
+      path: '/register',
+      query: data
+    })
+  }
+  // 用户已注册
+  router.push('/')
+}
+```
+
+
+
+在`qq-login`组件中使用`oauthLogin`
+
+```js
+onMounted(() => {
+  // 监听子窗口发送的用户信息数据； 拿到接收的用户信息（AccessToken， 用户头像、昵称）进行oauthLogin登录尝试
+  listener().then((data) => {
+    oauthLogin('QQ', data) // + 执行授权登录
+  })
+})
+```
+
+在`store/modules/user.js` 返回登录状态码
+
+```js
+export default {
+    actions : {
+        async handleLogin(context, payload) {
+          try {
+            // 登录、获取token 当有password时，进行md5加密
+
+            const { token, code } = await getToken({
+              ...payload,
+              password: payload.password ? md5(payload.password) : ''
+            })
+            // + code 204表示未注册 code为204时返回
+            if (code === OAUTH_LOGIN_NO_REGISTER_CODE) {
+              return code
+            }
+            // 存储token
+            context.commit('setToken', token)
+            // 获取用户信息
+            const userInfo = await getProfile()
+            context.commit('setUserInfo', userInfo)
+            Message.success(
+              `欢迎您 ${
+                userInfo.vipLevel
+                  ? `最贵的VIP${userInfo.vipLevel}用户 ${userInfo.nickname}`
+                  : userInfo.nickname
+              }`
+            )
+            // 跳转到首页
+            router.replace('/')
+          } catch (error) {
+            return Promise.reject(error)
+          }
+        },
+    }
+}
+```
+
+#### 48.5、移动端QQ登录对接:触发吊起操作，完成移动端QQ登录
+
+目前我们的`QQ`登录功能已经可以在`PC`端中正常使用了。
+但是如果在移动端中进行访问，大家会发现,出现了一些问题。
+**出现这个问题的原因是因为:**
+对于移动端而言:
+
+通过移动端触发`QQ`登录会展示三个页面，**原页面**、**`QQ`吊起页面**、**回调页面**。
+并且移动端一个页面展示整屏内容，且无法直接通过`window.close()`关闭。
+
+> 注意： 在移动端、我们没有像pc端浏览器子窗口的改概念、每次打开一个窗口都会沾满浏览器；所以我们没必要执着于调用`window.close()`关闭页面；我们可以直接在新打开的页面上直接进行操作
+
+所以在移动端中,我们需要在当前页面中，继续进行后续操作。
+那么据此我们可以在: `src/views/login-register/login/qq-login.vue` 中执行以下代码:
+
+```js
+onMounted(() => {
+  // 当我们登录成功之后、会缓存起来、下次登录不需要扫码、所以我们需要注销登录、避免用户下次登录时展示上次的记录
+  QC.Login(
+    {
+      btnId: 'qqLoginBtn' //插入按钮的节点id
+    },
+    (data, ops) => {
+      // 扫码授权登录成功后的回到
+      console.log(data, '登录成功')
+      // 注销登录
+      QC.Login.signOut()
+      // 登录成功的回调
+      // https://imooc-front.lgdsunday.club/login#access_token=4723B87EC749FA12A7247F40975D7BFB&expires_in=7776000
+      // 解析地址栏地址获取token
+      const accessToken = getQQAccessToken()
+	 
+      /*
+      sendMsg({
+        ...data,
+        accessToken
+      })
+      // 发送之后关闭子窗口
+      setTimeout(() => {
+        window.close()
+      })
+      */ 
+      // + 改为以下逻辑处理
+      if (isMoboleTerminal.value) {
+        // 移动端
+        oauthLogin('QQ', data)
+      } else {
+        // pc端
+        // 将data中的用户昵称、和用户头像、以及accessToken发送给主窗口
+        sendMsg({
+          ...data,
+          accessToken
+        })
+        // pc端 发送之后关闭子窗口
+        setTimeout(() => {
+          window.close()
+        })
+      }
+    }
+  )
+```
+
+#### 48.6 :微信开放平台大解析
+
+搞定了`QQ`扫码登录之后,接下来我们来处理微信扫码登录。
+那么对于微信扫码登录而言，同样需要进行开放平台的注册，所以本小节，我们将为大家讲解微信开放平台的注册流程。
+**整个讲解将会分为:**
+1．微信公众平台与微信开放平台的区别
+
+2.微信开放平台账户注册
+3.微信开放平台应用注册
+
+4．开发者资质认证
+**这四个大部分:**
+微信公众平台与微信开放平台的区别微信公众平台
+
+#### 48.7、对接微信扫码登录
+
+[进入微信登录对接官方文档](https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html)
+整个微信登录流程与QQ登录流程略有不同,分为以下几步:
+
+* 1.通过微信登录前置数据获取接口，获取登录数据（比如`APPID`)
+* 2．根据获敢到的数据,拼接得到 `open url`地址
+* 3.打开该地址,展示微信登录二维码
+* 4.移动端微信扫码确定登录
+* 5.从当前窗口中解析 `window.location.search`得到用户的code 数据
+* 6.根据`appId`、`appSecret`、`code`通过接口获取用户的`access_token`
+* 7．根据`access_token`获取用户信息
+* 8.通过用户信息触发`oauthLogin`方法
+  那么接下来我们就根据以上分析分析对应代码代码逻辑:
+  1.创建 `src/views/login-register/login/weixin-login.vue` 组件，并写入以下 `html`
+
+
+
+```vue
+<template>
+  <div @click="handleWxLogin">
+    <svg-icon
+      class="w-4 h-4 fill-zinc-200 dark:fill-zinc-300 duration-500 cursor-pointer"
+      name="wexin"
+    ></svg-icon>
+  </div>
+</template>
+
+<script setup>
+import { getWXLoginData, getWXLoginToken, getWXLoginUserInfo } from '@/api/sys'
+import { sendMsg, listener, close as broadcaseClose } from '@/utils/broadcase'
+import oauthLogin from '../../oauthLogin'
+import { LOGIN_TYPE_WX } from '@/constants'
+
+let wxConfig = {}
+// 点击的时候触发请求
+const handleWxLogin = async () => {
+  // 1、获取调起wx扫一扫二维码配置信息
+  wxConfig = await getWXLoginData()
+  const { appId, appSecret, redirectUri, scope, state } = wxConfig
+  // 2、代用微信扫一扫二维码有两种方式： 方式一在其他标签页打开二维码。方式二将扫一扫二维码内嵌到当前页面中；
+  // 本次采用的是第一种 在其他标签页打开二维码
+  window.open(
+    `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=${scope}&state=${state}#wechat_redirect `,
+    '',
+    'top=20,right=20,width=585,height=585'
+  )
+}
+
+// 3、判断是否是微信重定向的页面（判断有没有code,有code则是微信授权之后的重定向页面）拿到code数据传递给主窗口进程
+if (window.location.search && /code\=(.+)&state/.test(window.location.search)) {
+  const code = window.location.search.match(/code\=(.+)&state/)[0]
+  sendMsg({
+    code,
+    ...wxConfig
+  })
+}
+
+// 主窗口监听页面的授权成功返回的数据
+listener().then(
+  async ({ appId, appSecret, redirectUri, scope, state, code }) => {
+    broadcaseClose()
+    // 4、通过code获取用户access_token和openid
+    const { access_token, openid } = await getWXLoginToken({
+      appid: appId,
+      sectet: appSecret,
+      code
+    })
+    const { nickname, headimgUrl } = await getWXLoginUserInfo({
+      accessToken: access_token,
+      openid
+    })
+    // 使用微信授权登录
+    oauthLogin(LOGIN_TYPE_WX, { nickname, headimgUrl, openid })
+  }
+)
+</script>
+```
+
+那么至此我们完成了QQ扫码登录，微信扫码登录、移动端下的 QQ主动吊起登录。但是对于移动端微信而言，我们不能在普通的HS下吊起微信APP 触发登录。
+根据我们本章的内容可以发现，整个的第三方登录逻辑还是比较复杂的，特别是微信的第三方登录步骤更加繁琐。并且我们在调试的时候必须要在线上进行调试(测试环境)，所以大家在企业开发时，需要有更大的耐心才可以。
+
+![image-20220923135426097](images/image-20220923135426097.png)
+
+### 49、使用[兔小巢](https://support.qq.com/products/1368/)实现用户反馈平台
+
+我们使用[兔小巢](https://support.qq.com/products/1368/)来实现用户反馈平台：（重点是免费）
+
+![image-20220923142905062](images/image-20220923142905062.png)
+
+他的配置也很简单，只需要在官网注册后并创建应用、创建成功之后；直接在页面跳转就行了
+
+```js
+ window.open('https://support.qq.com/product/383681', '__blank')
+```
+
+但是这种的话，没有用户登录状态，需要用户扫码登录后才能发言；
+
+为了解决这个问题，官网文档给了说明：[传递登录态](https://txc.qq.com/helper/configLogonState)
+
+|  参数名  |  类型  |                    说明                    |
+| :------: | :----: | :----------------------------------------: |
+|  openid  | string |         用户唯一标识，由接入方生成         |
+| nickname | string |                  用户昵称                  |
+|  avatar  | string | 用户头像，一般是图片链接 *必须要支持https* |
+
+我们将、吐槽封装为一个组件：
+
+```vue
+<template>
+  <div
+    class="rounded-sm p-1 border border-zinc-300 bg-white flex items-center text-zinc-700 w-[150px] cursor-pointer duration-300 dark:bg-zinc-900 dark:border-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-800"
+    @click="handleGoFree"
+  >
+    <svg-icon
+      name="feedback"
+      class="w-1.5 h-1.5 fill-zinc-800 dark:fill-zinc-300 duration-300"
+    ></svg-icon>
+    <span class="text-sm ml-1 text-zinc-600 dark:text-zinc-300">立即吐槽</span>
+
+    <!-- 携带者用户登录参数跳转至兔小巢 -->
+    <form
+      v-show="false"
+      method="post"
+      action="https://support.qq.com/product/383681"
+    >
+      <input type="hidden" name="openid" :value="userInfo.wxOpenId" />
+      <input type="hidden" name="nickname" :value="userInfo.nickname" />
+      <input type="hidden" name="avatar" :value="userInfo.avatar" />
+      <button type="submit" ref="submitBtn" />
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { useStore } from 'vuex'
+import Message from '@/libs/message/index.js'
+import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+const store = useStore()
+const router = useRouter()
+const submitBtn = ref(null)
+
+const userInfo = computed(() => store.getters.userInfo)
+
+const handleGoFree = () => {
+    // 看用户是否登录过？ 没登录过跳转登录页面
+  if (Object.keys(userInfo.value).length <= 0) {
+    Message.warning('请先进行登录后再吐槽！')
+    setTimeout(() => {
+      router.push({
+        path: '/login',
+        query: {
+          redirect: '/'
+        }
+      })
+    }, 2500)
+    return false
+  }
+   // 用户已经登录，提交form跳转至兔小巢
+  submitBtn.value.click()
+}
+</script>
+
+<style></style>
+
+```
+
+
+
+![image-20220923150202823](images/image-20220923150202823.png)
+
+登录成功之后的跳转、可以看到兔小巢已经处于登录状态
+
+发布的信息也是可以通过当前账号进行发布
+
+
+
+### 50、实现分享功能
+
+
+本章节中我们主要来处理第三方平台的分享功能。
+说到分享,可能很多同学第一时间想到的就是:
+
+* 1．微博分享
+* 2．微信分享
+* 3.微信朋友圈分享
+
+但是对于网站而言，分享将会收到很大的限制，比如对于微信分享而言，在普通网站应用中将无法进行对接。
+所以我们本章中只能针对于微博实现分享功能。
+这个也是我们在前言处,需要进行明确的地方。
+那么明确好了之后，接下来就让我们进入微博分享的解决方案之中吧。
+
+
+
+在对接微博分享之前，我们还是按照老规矩，先来说一下所谓的分享，指的是什么。
+这里的分享描述将会从两个平台来进行说明。
+
+**微信**
+对于微信分享而言,又分为了两部分:
+1．聊天分享
+2．朋友圈分享
+
+两种分享方式，**其本质上指的都是:把一段信息或图片，发送到聊天或朋友圈中。**
+简单来说,就是节省了咱们复制消息，发送消息的一个过程。
+**但是对于微信而言，它不支持普通网站的分享，仅支持:APP或微信公众号、企业号、服务号的分享内容**
+**微博**
+**微博的分享原理与微信一样:把一段信息或图片,发送到微博中**
+
+
+
+* 1、现在[微博开放平台](https://open.weibo.com/)注册开发者账号以及应用
+
+* 2、整个微博的分享对接非常简单，我们知道所谓分享只是将一段内容发布到对应平台，所以我们只需要将这段内容填充到发布的url中即可。
+  呈
+
+1、在`index.html`中引入
+
+```html
+<script
+src="http://tjs	.sjs.sinajs.cn/open/api/js/wb.js"
+type="text/javascript"
+charset="utf-8"
+></script>
+```
+
+2、在定义常量
+
+```js
+// 微博
+export const WEI_BO_APP_KEY = '3454329089'
+export const WEI_BO_UID = '5984245953'
+```
+
+3、封装分享函数 `utils/weiboShare.js`
+
+```js
+import { WEI_BO_APP_KEY, WEI_BO_UID } from '@/constants'
+/**
+ *微博分享
+ * @param{*]imgUrl分享的图片URL* param {*]}path 网页链接
+ */
+export default (imgUrl, path) => {
+  window.open(
+    `https://service.weibo.com/share/share.php?url=${path}&title=这章图片不错，给大家分享看下&pic=${imgUrl}&appKey=${WEI_BO_APP_KEY}ralateUid=${WEI_BO_UID}`,
+    '_blank '
+  )
+}
+
+```
+
+4、触发分享
+
+```js
+// 分享
+const handleShare = () => {
+  weiboShare(
+    pins.value.photo,
+    `${window.location.origin}/pins/${pins.value.id}`
+  )
+}
+```
+
+会跳转至以下页面、点击分享即可
+
+![image-20220923170522086](images/image-20220923170522086.png)
+
+
+
+### 51、支付功能实现
+
+#### 51.1、支付宝支付实现
+
+1、现在支付宝开放平台、利用企业认证的账号进行注册（个人不能申请支付接口）
+
+2、入住开放平台
+
+3、创建应用
+
+4、添加能力
+
+​	手机网站支付 勾选
+​	电脑网站支付 勾选
+
+5、绑定AppID
+
+6、上线应用
+
+
+
+1、封装请求接口
+
+```js
+
+/**
+ * 支付宝下单
+| subject     | 支付标题         |              |
+| ----------- | ---------------- | ------------ |
+| totalAmount | 支付价格         | 默认为 0.01  |
+| body        | 支付描述         |              |
+| isMobile    | 是否为移动端请求 | 默认为 false |
+ * @returns
+ */
+export const alipay = (subject, totalAmount, body, isMobile) => {
+  return request({
+    url: '/user/alipay',
+    data: { subject, totalAmount, body, isMobile }
+  })
+}
+
+/**
+ * 支付宝结果
+ * out_trade_no 订单号
+ * @returns
+ */
+export const alipayResult = (out_trade_no) => {
+  return request({
+    url: '/user/alipay',
+    data: { out_trade_no }
+  })
+}
+
+```
+
+
+
+在pc端支付宝支付页面中调用`alipay`获取下单参数、并将参数拼接到调起支付宝支付的页面路径上
+
+```js
+const handlePay = async () => {
+  // 支付宝下单
+  const { title, desc } = props.selectMenuItem
+  console.log(props.selectMenuItem)
+  // 获取支付页面地址
+  const { encodeURI } = await alipay(title, 0.01, desc, false)
+  // https://excashier.alipay.com/standard/auth.htm?payOrderId=67ecd10be8c944e38e722017d29cab6b.55#
+  window.location.href = decodeURIComponent(encodeURI)
+}
+```
+
+![image-20220924110756410](images/image-20220924110756410.png)
+
+扫描并之后后会跳转到我们项目的`/pay/result`路径(后台配置的)，并携带支付订单号`out_trade_no`、所以我们需要创建路由组件`pay`
+
+`views/pay/index.vue`
+
+在组件内，拿到地址栏中的`out_trade_no`订单号，向后台请求、看支付的结果？来展示对应的支付状态
+
+```js
+<template>
+  <div
+    class="w-full h-screen bg-zinc-200 dark:bg-zinc-800 duration-300 overflow-hidden"
+  >
+    <navbar v-if="isMoboleTerminal">支付结果</navbar>
+    <div
+      class="w-full xl:mt-2 overflow-auto xl:max-w-sm mx-auto xl:rounded text-zinc-700 dark:text-zinc-200 duration-300 text-sm"
+    >
+      <div class="p-8 bg-white dark:bg-zinc-900">
+        <div class="flex flex-col items-center justify-center">
+          <!-- 支付成功 -->
+          <h1
+            class="mb-4 flex items-center text-[25px] text-green-700"
+            v-if="isSuccess"
+          >
+            <svg-icon name="pay-success" class="w-4 h-4 mr-2"></svg-icon>
+            支付成功
+          </h1>
+
+          <!-- 支付失败 -->
+          <h1 class="mb-4 flex items-center text-[25px] text-red-700" v-else>
+            <svg-icon name="pay-fail" class="w-4 h-4 mr-2"></svg-icon>
+            支付失败
+          </h1>
+          <Button
+            type="primary"
+            size="middle"
+            class="w-[100px]"
+            @click="handleConfirm"
+            >确定</Button
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { isMoboleTerminal } from '@/utils/flexible'
+import {  getProfile } from '@/api/sys'
+import {  alipayResult } from '@/api/pay'
+import { ref } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter, useRoute } from 'vue-router'
+const store = useStore()
+const router = useRouter()
+const route = useRoute()
+const isSuccess = ref(false)
+// 获取页面中携带的订单号、拿到订单号向后台请求看看是否支付成功？
+const getPayStatus = async () => {
+  const out_trade_no = route.query.out_trade_no
+  isSuccess.value = await alipayResult(out_trade_no)
+}
+getPayStatus()
+// 重新获取用户信息，并跳转到首页
+const handleConfirm = () => {
+  const userInfo = await getProfile()
+  store.commit('user/setUserInfo', userInfo)
+  router.push('/')
+}
+</script>
+
+<style></style>
+
+```
+
+#### 51.2、手机端支付宝支付实现
+
+其实后台已经帮我们封装好了，我们只需要在前台传递参数时`isMobile`为true即可
+
+```js
+/**
+ * 支付宝下单
+| subject     | 支付标题         |              |
+| ----------- | ---------------- | ------------ |
+| totalAmount | 支付价格         | 默认为 0.01  |
+| body        | 支付描述         |              |
+| isMobile    | 是否为移动端请求 | 默认为 false |
+ * @returns
+ */
+export const alipay = (subject, totalAmount, body, isMobile) => {
+  return request({
+    url: '/user/alipay',
+    data: { subject, totalAmount, body, isMobile }
+  })
+}
+```
+
+![image-20220924112006874](images/image-20220924112006874.png)
+
+#### 52.3、支付宝支付总体实现思路
+
+调用流程
+
+![image-20220924113320514](images/image-20220924113320514.png)
+
+1．用户在前端页面点击支付宝支付功能
+
+2．前端调用服务端接口
+3、服务端接收到请求，利用`alipay-sdk` (`nodejs`)创建文付订单信息，得到支付宝返回的url 
+
+4．服务端需要对该`url`进行`encode` (`encodeURIComponent`)操作，以防止意外的转码
+5．服务端返回该`url`(`encode`之后的)到前端
+6.前端进行`decode` 解码，得到支付的`url`
+7．前端控制跳转到该url ，即为支付宝用户支付页面
+8．用户在该页面完成支付，支付完成之后，支付宝会回调两个地址:
+	1. `returnUrl`:支付完成的跳转地址,用于用户视觉感知支付已成功
+	2. `notifylrl`:异步通知地址，以`http`或者`https`开头的，商户外网可以`post`访问的异步地址，用于接收支付宝返回的支付结果
+	9．前端通过`returnUrl`告知用户支付完成
+	10.．服务端通过`notifyUrl`完成用户支付之后的数据变更，同时需要对通知信息进行验签操作，并且在验签通过之后返回`success` 给支付宝
+	11．区分`PC`端支付和移动端支付的关键在于:
+	1．电脑端:服务端触发的接口为`alipay.trade.page.pay`
+	2．移动端:服务端触发的接口为`alipay.trade.wap.pay`
+
+### 52、组件作用域CSS如何样式穿透（深度选择器）
+
+[组件作用域 CSS](https://cn.vuejs.org/api/sfc-css-features.html#scoped-css)
+
+当 `<style>` 标签带有 `scoped` attribute 的时候，它的 CSS 只会影响当前组件的元素，和 Shadow DOM 中的样式封装类似。使用时有一些注意事项，不过好处是不需要任何的 polyfill。它的实现方式是通过 PostCSS 将以下内容：
+
+
+
+```vue
+<style scoped>
+.example {
+  color: red;
+}
+</style>
+
+<template>
+  <div class="example">hi</div>
+</template>
+```
+
+转换为：
+
+```vue
+<style>
+.example[data-v-f3f3eg9] {
+  color: red;
+}
+</style>
+
+<template>
+  <div class="example" data-v-f3f3eg9>hi</div>
+</template>
+```
+
+**子组件的根元素**
+
+使用 `scoped` 后，父组件的样式将不会渗透到子组件中。不过，**子组件的根节点会同时被父组件的作用域样式和子组件的作用域样式影响**。**这样设计是为了让父组件可以从布局的角度出发，调整其子组件根元素的样式。**
+
+**深度选择器**
+
+处于 `scoped` 样式中的选择器如果想要做更“深度”的选择，也即：影响到子组件，可以使用 `:deep()` 这个伪类：
+
+```vue
+<style scoped>
+.a :deep(.example {
+ color: red;
+}
+</style>
+```
+
+上面的代码会被编译成：
+
+```css
+.a[data-v-f3f3eg9] .example {
+  color: red;
+}
+```
+
+
+
+**Vue2中的深度选择器**
+
+```ruby
+第一种写法箭头三剑客（原生css）：>>>
+.类名 >>> .类名{ 样式 }
+
+第二种（预处理器：sass、less）：/deep/
+/deep/ .类名{ 样式 }
+
+第三种（预处理器：sass、less）：::v-deep
+::v-deep .类名{ 样式 }
+```
+
+
+
+```vue
+<style lang="scss" scoped>
+    body {
+        &::v-deep .example{
+            color: red;
+        }
+    }
+</style>
+
+
+<style lang="scss" scoped>
+    body {
+        &/deep/ .example{
+            color: red;
+        }
+    }
+</style>
+```
+
+```vue
+<style scoped>
+    body {
+        &>>> .example{
+            color: red;
+        }
+    }
+</style>
+```
+
