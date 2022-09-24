@@ -6,7 +6,7 @@ import store from '@/store'
 import { ROUTER_TYPE_PUSH, ROUTER_TYPE_BACK } from '@/constants'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.VITE_BASE_PATH),
   routes: isMoboleTerminal.value ? mobileRoutes : pcRoutes
   // scrollBehavior(to, from, savedPosition) {
   //   console.log(to, from, savedPosition)

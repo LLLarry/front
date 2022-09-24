@@ -1,6 +1,5 @@
 ## 基于 Vue3打造前台+中台通用提效解决方案
 
-
 [项目预览](http://121.5.230.70:8000/front)
 
 ### 1、项目架构
@@ -8054,3 +8053,59 @@ export const alipay = (subject, totalAmount, body, isMobile) => {
 </style>
 ```
 
+### 52、项目上线、配置基础路径
+
+我们在本地开发的时候、是在本地开启的代理、但是上线之后，本地开启的代理就不能用了，需要在服务器上配置代理，具体配置如下：
+
+`nginx.conf`
+
+```
+location /prod-api/ {
+	proxy_pass xxxx;
+}
+```
+
+我们在本地开发的时候，根路径是`/`；但是我们服务器有可能有多个项目，所以根路径`/`有可能已经被占用了，所以我们就将`/`改为`/front`。需要进行以下操作：
+
+1、更改`vite.config.js`
+
+```js
+export default defineConfig({
+    base: '/front' // + 作用打包到的静态文件夹的路径地址前加上 /front 不加这不上线之后静态资源出现404
+})
+```
+
+2、配置路由基础路径
+
+```js
+const router = createRouter({
+  history: createWebHistory('/front'), // createWebHistory接收参数为 路由的基础路径，不然上线之后会出现匹配不到路由的情况
+  routes: isMoboleTerminal.value ? mobileRoutes : pcRoutes
+})
+```
+
+3、nginx中创建项目存放文件夹front
+
+
+
+![image-20220924175007008](images/image-20220924175007008.png)
+
+4、在nginx中配置当访问`/front`路径时,或404时返回`front/index.html`
+
+```
+ location /front {
+     alias /usr/local/nginx/html/front/; # 映射到创建文件夹的地址
+     index  index.html index.htm; 
+     try_files $uri $uri/ /front/index.html; # 当找不到时依次返回index.html
+ }
+```
+
+5、重启nginx
+
+```
+nginx -s reload
+```
+
+6、打包、上传到服务器中创建的front目录下
+
+7、访问测试
