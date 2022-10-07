@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 export const getSecret = () => {
   const codetype = Number.parseInt(Date.now() / Math.pow(10, 3))
-  const icode = md5(`${codetype}LGD_Sunday-1991`)
+  const icode = md5(`${codetype}LGD_Sunday-1991-12-30`)
   return { codetype, icode }
 }
 
@@ -110,23 +110,21 @@ export const contralTimeout = (time, cb) => {
   }
 }
 
-
 export const useMobileScroll = (el) => {
-  var overscroll = function(el) {
-    el.addEventListener('touchstart', function() {
-      var top = el.scrollTop
-        , totalScroll = el.scrollHeight
-        , currentScroll = top + el.offsetHeight;
-      if(top === 0) {
-        el.scrollTop = 1;
-      } else if(currentScroll === totalScroll) {
-        el.scrollTop = top - 1;
+  var overscroll = function (el) {
+    el.addEventListener('touchstart', function () {
+      var top = el.scrollTop,
+        totalScroll = el.scrollHeight,
+        currentScroll = top + el.offsetHeight
+      if (top === 0) {
+        el.scrollTop = 1
+      } else if (currentScroll === totalScroll) {
+        el.scrollTop = top - 1
       }
-    });
-    el.addEventListener('touchmove', function(evt) {
-      if(el.offsetHeight < el.scrollHeight)
-        evt._isScroller = true;
-    });
+    })
+    el.addEventListener('touchmove', function (evt) {
+      if (el.offsetHeight < el.scrollHeight) evt._isScroller = true
+    })
   }
-  overscroll(el);
+  overscroll(el)
 }
