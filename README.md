@@ -74,7 +74,7 @@ webpack依然会给我们抛出一个对应的错误 `Can't resolve './a.js' in 
   ```powershell
   $ npm run dev
 
-![image-20220816094012941](images/image-20220816094012941.png)
+![image-20220816094012941](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816094012941.png)
 
 可以看到，项目已经启动，但是没有 `network`地址；我们需要手动配置下
 
@@ -173,7 +173,7 @@ import './style.css'
 
 保存之后，运行后，会报没有`sass`依赖包的错误，所以我们需要手动安装一下
 
-![image-20220816105339932](images/image-20220816105339932.png)
+![image-20220816105339932](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816105339932.png)
 
 ```powershell
 $ yarn add sass
@@ -199,7 +199,7 @@ $ yarn add sass
 
 * 1、在vscode中插件库中安装 prettier
 
-![image-20220816145837118](images/image-20220816145837118.png)
+![image-20220816145837118](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816145837118.png)
 
 * 2、在项目的根目录下创建`.prettierrc`文件
 
@@ -213,27 +213,27 @@ $ yarn add sass
 
 * 3、在`.vue`和`.js`结尾的文件中，**点击右键**，选择“使用...格式化文档”，选择“配置默认格式化程序”，选择“Prettier”
 
-![image-20220816150512904](images/image-20220816150512904.png)
+![image-20220816150512904](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816150512904.png)
 
-![image-20220816150527541](images/image-20220816150527541.png)
+![image-20220816150527541](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816150527541.png)
 
-![image-20220816150548579](images/image-20220816150548579.png)
+![image-20220816150548579](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816150548579.png)
 
 * 4、在vsode的设置页面，搜索“save”,找到“Format On Save” 勾选上；等到保存时会自动格式化代码
 
-  ![image-20220816150824725](images/image-20220816150824725.png)
+  ![image-20220816150824725](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816150824725.png)
 
 #### 5.2、配置`tailwindcss`插件
 
 这个插件可以帮助我们在写代码时，进行`tailwindcss`的`css`类名提示
 
-![image-20220816151044955](images/image-20220816151044955.png)
+![image-20220816151044955](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816151044955.png)
 
 #### 5.3、安装**Volar**插件
 
 这个插件代替了`Vuter`功能，比`Vuter`更加贴合Vue3
 
-![image-20220816151507317](images/image-20220816151507317.png)
+![image-20220816151507317](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816151507317.png)
 
 ### 6、项目结构分析
 
@@ -251,13 +251,13 @@ $ yarn add sass
 移动端的结构相对比较简单，当我们去进行路由跳转时，它是以整个页面进行的整体路由切换。
 那么由此可知，移动端不存在嵌套路由的概念，只需要在 APP.vue 中保留一个路由出口即可。
 
-![image-20220816154619643](images/image-20220816154619643.png)
+![image-20220816154619643](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816154619643.png)
 
 #### 6.2、PC端接否分析
 
 pc端相对于移动端、多了一个固定头部的部分，所以处理起来更加复杂一点
 
-![image-20220816154910365](images/image-20220816154910365.png)
+![image-20220816154910365](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816154910365.png)
 
 我们需要通过两个路由出口进行表示:
 1. `App.vue` :一级路由出口,用作整页路由切换
@@ -270,7 +270,7 @@ pc端相对于移动端、多了一个固定头部的部分，所以处理起来
 
 项目的整体结构如下图所示
 
-![image-20220816160615099](images/image-20220816160615099.png)
+![image-20220816160615099](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220816160615099.png)
 
 首先，我们项目中使用了`vuex`和`vue-router`;那么接下来我们先来安装他们吧
 
@@ -433,7 +433,7 @@ useREM()
 
 测试发现：**字体非常大，不符合我们的预期；如下图所示**
 
-![image-20220820094254567](images/image-20220820094254567.png)
+![image-20220820094254567](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220820094254567.png)
 
 解决办法： **tailwindcss提供了配置文件，我们可以在配置文件中自定义一些样式**
 
@@ -460,7 +460,7 @@ module.exports = {
 }
 ```
 
-![image-20220820095829409](images/image-20220820095829409.png)
+![image-20220820095829409](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220820095829409.png)
 
 配置完成生效
 
@@ -468,7 +468,7 @@ module.exports = {
 
 我们之前在webpack中封装了通用的svg图标、但是在vite中没有进行分装；所以在本项目中我们对svg图标进行通用封装
 
-![image-20220820110904744](images/image-20220820110904744.png)
+![image-20220820110904744](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220820110904744.png)
 
 我们先看一下文件目录
 
@@ -577,13 +577,13 @@ module.exports = {
 
   
 
-![image-20220820111656263](images/image-20220820111656263.png)
+![image-20220820111656263](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220820111656263.png)
 
 ### 12、实现移动端navigation头部效果
 
 需要实现的效果如下：
 
-![20220820_144232](images/20220820_144232.gif)
+![20220820_144232](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220820_144232.gif)
 
 **实现思路：**
 
@@ -899,7 +899,7 @@ watch(
 
 
 
-![20220822_104005](images/20220822_104005.gif)
+![20220822_104005](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220822_104005.gif)
 
 ### 13、封装通用组件 - popup
 
@@ -1019,7 +1019,7 @@ export default {
  const visible = ref(false)
 ```
 
-![20220820_172315](images/20220820_172315.gif)
+![20220820_172315](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220820_172315.gif)
 
 ### 14、Vite通用组件自动化注册
 
@@ -1082,7 +1082,7 @@ export default {
 
 需要实现的组件如下
 
-![image-20220823102101628](images/image-20220823102101628.png)
+![image-20220823102101628](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220823102101628.png)
 
 实现代码
 
@@ -1885,7 +1885,7 @@ export const useTheme = () => {
 }
 ```
 
-![20220824_182441 (1)](images/20220824_182441%20(1).gif)
+![20220824_182441 (1)](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220824_182441%20(1).gif)
 
 ### 20、实现瀑布流布局
 
@@ -1933,17 +1933,17 @@ export const useTheme = () => {
 
   通过计算，计算出子元素的位置，然后动态设置子元素的 `top`、`left`、`width`值，让其显示到正确位置
 
-​	缺点:
+	缺点:
 
-​		1、计算过程较复杂
+		1、计算过程较复杂
 
-​	优点：
+	优点：
 
-​		1、父元素的高度不需要固定
-
-​		2、可以实现上啦加载更多
-
-​		3、布局可以是横向布局
+		1、父元素的高度不需要固定
+		
+		2、可以实现上啦加载更多
+		
+		3、布局可以是横向布局
 
 > 综合上面方案：本项目中实现的瀑布流布局是采用**方案3**中的实现方法
 
@@ -1951,7 +1951,7 @@ export const useTheme = () => {
 
 比如： 我们要实现一个 **列数 column** 为 n 列的布局；
 
-​	  每一列的 横向和纵向间距为 gaps (比如：gaps = [10, 10])
+	  每一列的 横向和纵向间距为 gaps (比如：gaps = [10, 10])
 
 **实现思路**： 分为3步
 
@@ -2753,7 +2753,7 @@ getPexelsData(params)
 
 ```
 
-![20220826_141617 (1)](images/20220826_141617%20(1).gif)
+![20220826_141617 (1)](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220826_141617%20(1).gif)
 
 #### 20.5、总结
 
@@ -3055,7 +3055,7 @@ const getPexelsData = async () => {
 
 **为什么要使用图片懒加载**？
 
-![image-20220827101927965](images/image-20220827101927965.png)
+![image-20220827101927965](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220827101927965.png)
 
 这个是在项目中截取的图片、可以看到在初始化时，我们加载了76张图片、而实际首屏在可视范围内也就只展示了10多张图片；
 
@@ -3080,7 +3080,7 @@ const getPexelsData = async () => {
 
 #### 22.1、实现图片懒加载v-lazy指令
 
-![image-20220827110753001](images/image-20220827110753001.png)
+![image-20220827110753001](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220827110753001.png)
 
 src/directives/modules/lazy/index.js
 
@@ -3199,17 +3199,17 @@ createApp(App).use(router).use(store).use(libs)
 
 在瀑布流中使用v-lzay指令，效果如下
 
-![image-20220827110148142](images/image-20220827110148142.png)
+![image-20220827110148142](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220827110148142.png)
 
 可以看到首屏加载值请求了27个图片数据，当我们进行屏幕滚动时，也会发现请求会随着滚动而增加
 
-![20220827_110352](images/20220827_110352.gif)
+![20220827_110352](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220827_110352.gif)
 
 ### 23、图片白屏分析
 
 如下图所示、当图片加载比较慢的时候，会出现以下图片区域显示空白的情况；
 
-![image-20220827111533122](images/image-20220827111533122.png)
+![image-20220827111533122](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220827111533122.png)
 
 面对这种情况，我们可以使用在懒加载v-lazy添加默认图片的方式
 
@@ -3221,7 +3221,7 @@ createApp(App).use(router).use(store).use(libs)
 />
 ```
 
-![image-20220827112039879](images/image-20220827112039879.png)
+![image-20220827112039879](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220827112039879.png)
 
 但这种每个都显示这种图片看着就有点审美疲劳了，所以我们可以给每个图片设置个随机颜色来作为图片加载完成前的填充
 
@@ -3280,7 +3280,7 @@ export const createRandomColor = () => {
 }
 ```
 
-![20220827_113758 (1)](images/20220827_113758%20(1).gif)
+![20220827_113758 (1)](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220827_113758%20(1).gif)
 
 可以看出我们的自定义颜色指令已经能够使用了
 
@@ -3296,7 +3296,7 @@ export const createRandomColor = () => {
 
 再笨章节我们需要使用到的技术就是[import.meta.globEager](https://vitejs.cn/guide/features.html#glob-import)
 
-![image-20220827115319317](images/image-20220827115319317.png)
+![image-20220827115319317](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220827115319317.png)
 
 ```js
 export default {
@@ -3339,7 +3339,7 @@ export default {
 
 首先我们先看一个图片
 
-![757c3e6e2572809a0182970ba908df2e (2)](images/757c3e6e2572809a0182970ba908df2e%20(2).gif)
+![757c3e6e2572809a0182970ba908df2e (2)](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/757c3e6e2572809a0182970ba908df2e%20(2).gif)
 
 当我点击`popup`弹出层弹出的对应菜单时、弹出层隐藏后会触发下面的元素的点击事件； 这就是典型的点击穿透：
 
@@ -3415,7 +3415,7 @@ const onTouchEnd = (index) => {
 
 ### 27、解决infinite-list bug- 切换分类页后不能重新请求的问题
 
-![20220829_114732 (3)](images/20220829_114732%20(3).gif)
+![20220829_114732 (3)](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220829_114732%20(3).gif)
 
 
 
@@ -3427,9 +3427,9 @@ const onTouchEnd = (index) => {
 
 这个问题的本质就是：
 
-​	首先我们的`infinite-list`组件内是通过**`IntersectionObserver`来监听`loading`元素是否在可视范围内**
-
-​	**如果在可视范围内则不发送请求、反之发送请求**
+	首先我们的`infinite-list`组件内是通过**`IntersectionObserver`来监听`loading`元素是否在可视范围内**
+	
+	**如果在可视范围内则不发送请求、反之发送请求**
 
 
 
@@ -3524,11 +3524,11 @@ const getChildInstance = (el) => {
 
 **极简白**
 
-![image-20220830100938727](images/image-20220830100938727.png)
+![image-20220830100938727](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220830100938727.png)
 
 **极夜黑**
 
-![image-20220830100959365](images/image-20220830100959365.png)
+![image-20220830100959365](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220830100959365.png)
 
 **实现思路：**
 
@@ -3664,7 +3664,7 @@ const scrollTheme = computed(() => store.getters.scrollTheme)
 
 **首先看一下封装`confirm`的结构**
 
-![image-20220830160243841](images/image-20220830160243841.png)
+![image-20220830160243841](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220830160243841.png)
 
 说明： 
 
@@ -3824,7 +3824,7 @@ confirm/index.js
 
 **h函数**：[官网](https://cn.vuejs.org/api/render-function.html#h) 根据传入的参数生成对应的`vnode` 虚拟`dom`
 
-​	我们常见的h函数的第一个参数一般都是标签名， 但是在`vue3`提供的**h函数** **第一个参数不但可以接收字符串变签名，还可以支持组件**
+	我们常见的h函数的第一个参数一般都是标签名， 但是在`vue3`提供的**h函数** **第一个参数不但可以接收字符串变签名，还可以支持组件**
 
 **render函数**： 在vue3中有两种render： 第一种就是组件中的render，它返回一个vnode树； 第二种就是本次使用的render,它的作用就是将虚拟dom渲染到真实dom中
 
@@ -3907,7 +3907,7 @@ const onClickDelectAll = () => {
 
 
 
-![image-20220830172046623](images/image-20220830172046623.png)
+![image-20220830172046623](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220830172046623.png)
 
 
 
@@ -3921,9 +3921,9 @@ const onClickDelectAll = () => {
 2．然后构建出对应的message/index.js模块
 3.在模块中,通过:
 
-​	`h`函数构建`vnode`
-
-​	`render`函数,进行渲染
+	`h`函数构建`vnode`
+	
+	`render`函数,进行渲染
 进行处理。
 那么以上方式，就是是咱们message的构建过程。
 
@@ -4176,7 +4176,7 @@ const show = () => {
 }
 ```
 
-![20220831_142332](images/20220831_142332.gif)
+![20220831_142332](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220831_142332.gif)
 
 
 
@@ -4339,7 +4339,7 @@ const handleFullScreen = () => {
 
 首先我们看一下首页的图片
 
-![image-20220902162832479](images/image-20220902162832479.png)
+![image-20220902162832479](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220902162832479.png)
 
 **分析：**
 
@@ -4358,7 +4358,7 @@ const handleFullScreen = () => {
 </router-view>
 ```
 
-![image-20220902164012102](images/image-20220902164012102.png)
+![image-20220902164012102](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220902164012102.png)
 
 
 
@@ -4441,7 +4441,7 @@ onMounted(() => {
 </script>
 ```
 
-![20220902_180847](images/20220902_180847.gif)
+![20220902_180847](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220902_180847.gif)
 
 **测试2** - 手动控制执行动画
 
@@ -4481,7 +4481,7 @@ const handleReverse = () => {
 
 * 1、创建pins/components/pins.vue组件
 
-  ![image-20220903100744179](images/image-20220903100744179.png)
+  ![image-20220903100744179](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220903100744179.png)
 
 * 2、在首页中使用`Pins`组件，并使用`translation`包裹、并设置执行动画
 
@@ -4507,7 +4507,7 @@ const handleReverse = () => {
 
 **先看下我们要实现的效果**
 
-![20220903_102106](images/20220903_102106.gif)
+![20220903_102106](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220903_102106.gif)
 
 **开始实现**
 
@@ -4804,7 +4804,7 @@ export const validatePassword = (value) => {
 }
 ```
 
-![image-20220905092900887](images/image-20220905092900887.png)
+![image-20220905092900887](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905092900887.png)
 
 如果输入的内容校验不通过会有错误的提示
 
@@ -4814,15 +4814,15 @@ export const validatePassword = (value) => {
 
 在我们日常开发过程中人类行为认真已经无处不在了，它只要的作用就是过滤出非人类的一些操作的
 
-![image-20220905095446717](images/image-20220905095446717.png)
+![image-20220905095446717](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905095446717.png)
 
-![image-20220905095457426](images/image-20220905095457426.png)
+![image-20220905095457426](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905095457426.png)
 
 
 
-![image-20220905095545633](images/image-20220905095545633.png)
+![image-20220905095545633](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905095545633.png)
 
-![image-20220905095603731](images/image-20220905095603731.png)
+![image-20220905095603731](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905095603731.png)
 
 #### 36.2、目的是什么？
 
@@ -4882,7 +4882,7 @@ export const validatePassword = (value) => {
 
 首先在项目中引入两个文件（这两个文件是根据业务多级经过修改的、如果您使用当前插件的话、建议您使用官方包）
 
-![image-20220905115118323](images/image-20220905115118323.png)
+![image-20220905115118323](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905115118323.png)
 
 **封装人类行为认证组件**
 
@@ -5101,7 +5101,7 @@ const onClose = () => {
 
 ```
 
-![image-20220905142847856](images/image-20220905142847856.png)
+![image-20220905142847856](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220905142847856.png)
 
 完成之后的效果如上
 
@@ -5120,7 +5120,7 @@ const onClose = () => {
 * 3、支持设置`max`属性值，来限定输出内容的最大长度
 * 4、支持原生的属性直接透传到`input`或`textarea`组件上
 
-![image-20220906141919521](images/image-20220906141919521.png)
+![image-20220906141919521](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220906141919521.png)
 
 上面时我们实现的组件
 
@@ -5252,7 +5252,7 @@ watch(
             />
 ```
 
-![image-20220906141919521](images/image-20220906141919521.png)
+![image-20220906141919521](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220906141919521.png)
 
 ```vue
 			<v-input
@@ -5263,7 +5263,7 @@ watch(
             />
 ```
 
-![image-20220906142546414](images/image-20220906142546414.png)
+![image-20220906142546414](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220906142546414.png)
 
 
 
@@ -5438,7 +5438,7 @@ const onOk = () => {
 </script>
 ```
 
-![20220906_160011](images/20220906_160011.gif)
+![20220906_160011](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220906_160011.gif)
 
 
 
@@ -5458,7 +5458,7 @@ const onOk = () => {
 </script>
 ```
 
-![20220906_155904](images/20220906_155904.gif)
+![20220906_155904](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220906_155904.gif)
 
 
 
@@ -5476,7 +5476,7 @@ const onOk = () => {
 </script>
 ```
 
-![20220906_160104](images/20220906_160104-16624525367382.gif)
+![20220906_160104](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220906_160104-16624525367382.gif)
 
 
 
@@ -5687,11 +5687,11 @@ const handleClose = () => {
 
 移动端效果如下：
 
-![image-20220907092525211](images/image-20220907092525211.png)
+![image-20220907092525211](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220907092525211.png)
 
 pc端效果如下：
 
-![image-20220907092615713](images/image-20220907092615713.png)
+![image-20220907092615713](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220907092615713.png)
 
 ### 40、数据存储方案 - 腾讯cos和阿里oss
 
@@ -6191,7 +6191,7 @@ const handleClick = () => {
 
 **警告信息如下**：
 
-![image-20220919095816842](images/image-20220919095816842.png)
+![image-20220919095816842](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220919095816842.png)
 
 我们只需要把
 
@@ -6257,7 +6257,7 @@ template>
 
 
 
-![20220919_173609](images/20220919_173609.gif)
+![20220919_173609](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220919_173609.gif)
 
 #### 44.2、实现动画的思路
 
@@ -6525,7 +6525,7 @@ const onAfterEnter = (el) => {
 我们把: **组件的进入和退出流程,比作一个栈。**
 **那么只有进入到栈中的组件才需要被缓存**，这就像 Android 中的任务栈概念一样，如下图所示:
 
-![image-20220917173253252](images/image-20220917173253252.png)
+![image-20220917173253252](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220917173253252.png)
 
 在当前咱们移动端的组件处理中，我们同样期望有一个这样的栈来维护我们的组件进入和退出流程，所以我们把这样的一套流程，称作**:虚拟任务栈**
 
@@ -6539,7 +6539,7 @@ const onAfterEnter = (el) => {
 
 我们先看一下实现效果
 
-![20220920_105324](images/20220920_105324.gif)
+![20220920_105324](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220920_105324.gif)
 
 * 1、在**路由表**和**组件**中都添加对应的**name**属性；且要设置name属性值是相同的
 
@@ -6753,11 +6753,11 @@ const virtualTaskList = useVirtualTask(props.mainComponentName)
 
 什么是缓存滚动位置？
 
-​	比如我们在首页长列表中、滚动某个位置、跳转到其他页面；再会退回来还能保持到上一次滚动的位置 ；
+	比如我们在首页长列表中、滚动某个位置、跳转到其他页面；再会退回来还能保持到上一次滚动的位置 ；
 
 我们先看一下效果：
 
-![20220920_1420](images/20220920_1420.gif)
+![20220920_1420](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/20220920_1420.gif)
 
 #### 46.1、实现思路
 
@@ -7086,7 +7086,7 @@ onMounted(() => {
 
 ```
 
-![image-20220922145401409](images/image-20220922145401409.png)
+![image-20220922145401409](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220922145401409.png)
 
 上面的图片可以得知、`qqLoginBtn`就是放置调起二维码按钮的地方、点击`qqLoginBtn`标签中的a链接、可以调起二维码；但是这样写有太丑；所以我们可以将a链接的透明度设置为0，并且置于最下方即可;css如下
 
@@ -7173,7 +7173,7 @@ const getQQAccessToken = () => {
 
 ```
 
-![image-20220922151658244](images/image-20220922151658244.png)
+![image-20220922151658244](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220922151658244.png)
 
 > 注意：扫码成功重定向的地址是在小窗口打开的、并不是在原来的窗口打开、登录成功的回调也是在小窗口中回调
 
@@ -7568,13 +7568,13 @@ listener().then(
 那么至此我们完成了QQ扫码登录，微信扫码登录、移动端下的 QQ主动吊起登录。但是对于移动端微信而言，我们不能在普通的HS下吊起微信APP 触发登录。
 根据我们本章的内容可以发现，整个的第三方登录逻辑还是比较复杂的，特别是微信的第三方登录步骤更加繁琐。并且我们在调试的时候必须要在线上进行调试(测试环境)，所以大家在企业开发时，需要有更大的耐心才可以。
 
-![image-20220923135426097](images/image-20220923135426097.png)
+![image-20220923135426097](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220923135426097.png)
 
 ### 49、使用[兔小巢](https://support.qq.com/products/1368/)实现用户反馈平台
 
 我们使用[兔小巢](https://support.qq.com/products/1368/)来实现用户反馈平台：（重点是免费）
 
-![image-20220923142905062](images/image-20220923142905062.png)
+![image-20220923142905062](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220923142905062.png)
 
 他的配置也很简单，只需要在官网注册后并创建应用、创建成功之后；直接在页面跳转就行了
 
@@ -7656,7 +7656,7 @@ const handleGoFree = () => {
 
 
 
-![image-20220923150202823](images/image-20220923150202823.png)
+![image-20220923150202823](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220923150202823.png)
 
 登录成功之后的跳转、可以看到兔小巢已经处于登录状态
 
@@ -7751,7 +7751,7 @@ const handleShare = () => {
 
 会跳转至以下页面、点击分享即可
 
-![image-20220923170522086](images/image-20220923170522086.png)
+![image-20220923170522086](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220923170522086.png)
 
 
 
@@ -7767,8 +7767,8 @@ const handleShare = () => {
 
 4、添加能力
 
-​	手机网站支付 勾选
-​	电脑网站支付 勾选
+	手机网站支付 勾选
+	电脑网站支付 勾选
 
 5、绑定AppID
 
@@ -7826,7 +7826,7 @@ const handlePay = async () => {
 }
 ```
 
-![image-20220924110756410](images/image-20220924110756410.png)
+![image-20220924110756410](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220924110756410.png)
 
 扫描并之后后会跳转到我们项目的`/pay/result`路径(后台配置的)，并携带支付订单号`out_trade_no`、所以我们需要创建路由组件`pay`
 
@@ -7923,13 +7923,13 @@ export const alipay = (subject, totalAmount, body, isMobile) => {
 }
 ```
 
-![image-20220924112006874](images/image-20220924112006874.png)
+![image-20220924112006874](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220924112006874.png)
 
 #### 52.3、支付宝支付总体实现思路
 
 调用流程
 
-![image-20220924113320514](images/image-20220924113320514.png)
+![image-20220924113320514](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220924113320514.png)
 
 1．用户在前端页面点击支付宝支付功能
 
@@ -8088,7 +8088,7 @@ const router = createRouter({
 
 
 
-![image-20220924175007008](images/image-20220924175007008.png)
+![image-20220924175007008](https://blog-1302889287.cos.ap-nanjing.myqcloud.com/%E5%9F%BA%E4%BA%8E%20Vue3%20%E6%89%93%E9%80%A0%E5%89%8D%E5%8F%B0%2B%E4%B8%AD%E5%8F%B0%E9%80%9A%E7%94%A8%E6%8F%90%E6%95%88%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/image-20220924175007008.png)
 
 4、在nginx中配置当访问`/front`路径时,或404时返回`front/index.html`
 
